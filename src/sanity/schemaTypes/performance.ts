@@ -1,0 +1,172 @@
+import { defineType, defineField, defineArrayMember } from "sanity";
+
+/** Performance (Спектакль) — section 4 of the brief */
+export const performance = defineType({
+  name: "performance",
+  title: "Спектакль",
+  type: "document",
+  fields: [
+    defineField({
+      name: "title_ru",
+      title: "Название (RU)",
+      type: "string",
+      validation: (r) => r.required(),
+    }),
+    defineField({
+      name: "title_en",
+      title: "Название (EN)",
+      type: "string",
+      description: "Если пусто — на сайте используется RU (fallback).",
+    }),
+    defineField({
+      name: "kind",
+      title: "Раздел",
+      type: "string",
+      options: {
+        list: [
+          { title: "Спектакль", value: "performance" },
+          { title: "Проект", value: "project" },
+          { title: "Лаборатория", value: "lab" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "performance",
+      validation: (r) => r.required(),
+    }),
+    defineField({
+      name: "slug",
+      title: "URL (slug)",
+      type: "slug",
+      options: { source: "title_ru", maxLength: 96 },
+      validation: (r) => r.required(),
+    }),
+    defineField({
+      name: "theatre",
+      title: "Театр",
+      type: "string",
+    }),
+    defineField({
+      name: "year",
+      title: "Год",
+      type: "number",
+      validation: (r) => r.min(1900).max(2100),
+    }),
+    defineField({
+      name: "role",
+      title: "Роль / постановщик",
+      type: "string",
+      description: "Напр. «Режиссёр-постановщик».",
+    }),
+    defineField({
+      name: "artist",
+      title: "Художник",
+      type: "string",
+      description: "Художник-постановщик / сценограф.",
+    }),
+    defineField({
+      name: "tags",
+      title: "Жанр / теги",
+      type: "array",
+      of: [defineArrayMember({ type: "string" })],
+      options: { layout: "tags" },
+    }),
+    defineField({
+      name: "status",
+      title: "Статус",
+      type: "string",
+      options: {
+        list: [
+          { title: "Текущий репертуар", value: "current" },
+          { title: "Архив", value: "archive" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "current",
+      validation: (r) => r.required(),
+    }),
+    defineField({
+      name: "featured",
+      title: "На главной (избранное)",
+      type: "boolean",
+      initialValue: false,
+    }),
+    defineField({
+      name: "short_description_ru",
+      title: "Краткое описание (RU)",
+      type: "text",
+      rows: 3,
+    }),
+    defineField({
+      name: "short_description_en",
+      title: "Краткое описание (EN)",
+      type: "text",
+      rows: 3,
+    }),
+    defineField({
+      name: "full_description_ru",
+      title: "Полное описание (RU)",
+      type: "array",
+      of: [defineArrayMember({ type: "block" })],
+    }),
+    defineField({
+      name: "full_description_en",
+      title: "Полное описание (EN)",
+      type: "array",
+      of: [defineArrayMember({ type: "block" })],
+    }),
+    defineField({
+      name: "cover_image",
+      title: "Обложка",
+      type: "image",
+      options: { hotspot: true },
+    }),
+    defineField({
+      name: "gallery",
+      title: "Галерея",
+      type: "array",
+      of: [
+        defineArrayMember({
+          type: "image",
+          options: { hotspot: true },
+          fields: [
+            defineField({ name: "alt", title: "Alt-текст", type: "string" }),
+            defineField({ name: "caption_ru", title: "Подпись (RU)", type: "string" }),
+            defineField({ name: "caption_en", title: "Подпись (EN)", type: "string" }),
+          ],
+        }),
+      ],
+    }),
+    defineField({
+      name: "video_links",
+      title: "Видео (YouTube / Vimeo)",
+      type: "array",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({
+              name: "url",
+              title: "Ссылка",
+              type: "url",
+              validation: (r) => r.required(),
+            }),
+            defineField({ name: "label", title: "Подпись", type: "string" }),
+          ],
+          preview: {
+            select: { title: "label", subtitle: "url" },
+          },
+        }),
+      ],
+    }),
+  ],
+  orderings: [
+    {
+      title: "Год (по убыванию)",
+      name: "yearDesc",
+      by: [{ field: "year", direction: "desc" }],
+    },
+  ],
+  preview: {
+    select: { title: "title_ru", subtitle: "theatre", media: "cover_image" },
+  },
+});

@@ -1,0 +1,68 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "works": "Works",
+    "projects": "Projects",
+    "lab": "Lab",
+    "contacts": "Contacts"
+  },
+  "home": {
+    "hero_label": "Theatre Director",
+    "hero_name": "First Last",
+    "hero_tagline": "A director creating theatre at the crossroads of tradition and the contemporary",
+    "hero_cta": "View Works",
+    "featured_label": "Featured"
+  },
+  "about": {
+    "title": "About",
+    "bio_placeholder": "Biography text will appear here. A director with extensive experience in leading theatres across the country and abroad. Award laureate, participant of international festivals.",
+    "download_cv": "Download CV",
+    "timeline_label": "Timeline"
+  },
+  "works": {
+    "title": "Works",
+    "filter_all": "All",
+    "filter_year": "Year",
+    "current": "Current Repertoire",
+    "archive": "Archive",
+    "no_results": "No works found"
+  },
+  "work": {
+    "theatre": "Theatre",
+    "year": "Year",
+    "genre": "Genre",
+    "gallery": "Photos",
+    "video": "Video",
+    "press_about": "Press about this work"
+  },
+  "contacts": {
+    "title": "Contacts",
+    "email_label": "Email",
+    "social_label": "Social",
+    "cv_label": "CV & Press Materials",
+    "download_cv_ru": "CV in Russian (PDF)",
+    "download_cv_en": "CV in English (PDF)"
+  },
+  "common": {
+    "back": "Back",
+    "loading": "Loading…",
+    "lang_switch": "RU"
+  },
+  "projects": {
+    "title": "Projects",
+    "filter_all": "All",
+    "filter_year": "Year",
+    "current": "Current",
+    "archive": "Archive",
+    "no_results": "No projects found"
+  },
+  "lab": {
+    "title": "Laboratory",
+    "filter_all": "All",
+    "filter_year": "Year",
+    "current": "Current",
+    "archive": "Archive",
+    "no_results": "Nothing here yet"
+  }
+}
