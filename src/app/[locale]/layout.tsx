@@ -7,18 +7,30 @@ import Navigation from "@/components/Navigation";
 import { CursorPreviewProvider } from "@/components/CursorPreview";
 import "../globals.css";
 
-export const metadata: Metadata = {
-  title: {
-    default: "Театральный режиссёр",
-    template: "%s — Театральный режиссёр",
-  },
-  description: "Персональный сайт театрального режиссёра. Спектакли, биография, афиша, пресса.",
-  openGraph: {
-    type: "website",
-    locale: "ru_RU",
-    alternateLocale: "en_US",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const name = locale === "en" ? "Varvara Popova" : "Варвара Попова";
+  return {
+    title: {
+      default: name,
+      template: `%s — ${name}`,
+    },
+    description:
+      locale === "en"
+        ? "Theatre director — personal site. Works, biography, contacts."
+        : "Персональный сайт театрального режиссёра. Спектакли, биография, контакты.",
+    openGraph: {
+      type: "website",
+      locale: locale === "en" ? "en_US" : "ru_RU",
+      alternateLocale: locale === "en" ? "ru_RU" : "en_US",
+      title: name,
+    },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
