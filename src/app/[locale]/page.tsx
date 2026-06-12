@@ -1,4 +1,4 @@
-import { getFeaturedPerformances, type Locale } from "@/sanity/lib/data";
+import { getHome, getFeaturedPerformances, type Locale } from "@/sanity/lib/data";
 import HomeView from "./HomeView";
 
 export default async function HomePage({
@@ -7,6 +7,9 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const featured = await getFeaturedPerformances(locale as Locale);
-  return <HomeView featured={featured} />;
+  const [hero, featured] = await Promise.all([
+    getHome(locale as Locale),
+    getFeaturedPerformances(locale as Locale),
+  ]);
+  return <HomeView hero={hero} featured={featured} />;
 }

@@ -1,6 +1,13 @@
 // GROQ queries. Both RU and EN fields are fetched; locale fallback happens
 // in the data layer (see lib/data.ts) so a single query serves both languages.
 
+export const homeQuery = /* groq */ `
+*[_type == "home"][0] {
+  hero_label_ru, hero_label_en,
+  hero_name_ru, hero_name_en,
+  hero_tagline_ru, hero_tagline_en
+}`;
+
 export const performancesQuery = /* groq */ `
 *[_type == "performance" && kind == $kind] | order(year desc, _createdAt desc) {
   "slug": slug.current,

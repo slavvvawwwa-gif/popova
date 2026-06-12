@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useRef, useState } from "react";
-import type { WorkCard as WorkCardData } from "@/sanity/lib/data";
+import type { WorkCard as WorkCardData, HomeContent } from "@/sanity/lib/data";
 
 /* ─── Scroll-reveal hook ──────────────────────────────────────────── */
 function useReveal() {
@@ -163,7 +163,13 @@ function WorkCard({
 }
 
 /* ─── Page ────────────────────────────────────────────────────────── */
-export default function HomeView({ featured }: { featured: WorkCardData[] }) {
+export default function HomeView({
+  hero,
+  featured,
+}: {
+  hero: HomeContent;
+  featured: WorkCardData[];
+}) {
   const t = useTranslations("home");
   const tn = useTranslations("nav");
 
@@ -213,7 +219,7 @@ export default function HomeView({ featured }: { featured: WorkCardData[] }) {
               whiteSpace: "nowrap",
             }}
           >
-            {t("hero_label")}
+            {hero.label}
           </span>
           <span
             style={{
@@ -235,7 +241,7 @@ export default function HomeView({ featured }: { featured: WorkCardData[] }) {
               marginBottom: "0",
             }}
           >
-            {t("hero_name")}
+            {hero.name}
           </h1>
 
           {/* Tagline row */}
@@ -256,7 +262,7 @@ export default function HomeView({ featured }: { featured: WorkCardData[] }) {
                 lineHeight: 1.7,
               }}
             >
-              {t("hero_tagline")}
+              {hero.tagline}
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>

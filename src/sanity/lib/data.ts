@@ -7,6 +7,7 @@ import { client } from "./client";
 import { urlForImage } from "./image";
 import { pick, pickField } from "./localize";
 import {
+  homeQuery,
   performancesQuery,
   featuredPerformancesQuery,
   performanceBySlugQuery,
@@ -16,6 +17,7 @@ import {
   contactsQuery,
 } from "./queries";
 import {
+  fallbackHome,
   fallbackWorks,
   fallbackWorkDetail,
   fallbackPlaybill,
@@ -97,6 +99,12 @@ export interface ContactsData {
   socials: { platform: string; url: string; handle: string }[];
 }
 
+export interface HomeContent {
+  label: string;
+  name: string;
+  tagline: string;
+}
+
 const yearOf = (d?: string | null) =>
   d ? new Date(d).getFullYear() : null;
 
@@ -104,6 +112,19 @@ const yearOf = (d?: string | null) =>
 // Sanity webhook can revalidate it on demand (see /api/revalidate). The 60s
 // revalidate is a fallback if the webhook isn't configured.
 const cache = (tags: string[]) => ({ next: { revalidate: 60, tags } });
+
+/* ─── Home (singleton) ───────────────────────────────────────────── */
+export async function getHome(locale: Locale): Promise<HomeContent> {
+  if (!client) return fallbackHome(locale);
+  const r = await client.fetch<Record<string, unknown> | null>(homeQuery, {}, cache(["home"]));
+  if (!r) return fallbackHome(locale);
+  const fb = fallbackHome(locale);
+  return {
+    label: pick(r, "hero_label", locale) || fb.label,
+    name: pick(r, "hero_name", locale) || fb.name,
+    tagline: pick(r, "hero_tagline", locale) || fb.tagline,
+  };
+}
 
 /* ─── Performances ───────────────────────────────────────────────── */
 export async function getPerformances(locale: Locale, kind: Kind = "performance"): Promise<WorkCard[]> {

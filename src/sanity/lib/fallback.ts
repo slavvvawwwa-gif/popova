@@ -9,6 +9,7 @@ import type {
   PressEntry,
   BioData,
   ContactsData,
+  HomeContent,
 } from "./data";
 
 const t = (locale: Locale, ru: string, en: string) => (locale === "en" ? en : ru);
@@ -180,6 +181,18 @@ export function fallbackBio(locale: Locale): BioData {
     ],
     cvRu: null,
     cvEn: null,
+  };
+}
+
+export function fallbackHome(locale: Locale): HomeContent {
+  return {
+    label: t(locale, "Театральный режиссёр", "Theatre Director"),
+    name: t(locale, "Имя Фамилия", "First Last"),
+    tagline: t(
+      locale,
+      "Режиссёр, создающий театр на пересечении традиции и современности",
+      "A director creating theatre at the crossroads of tradition and the contemporary"
+    ),
   };
 }
 
