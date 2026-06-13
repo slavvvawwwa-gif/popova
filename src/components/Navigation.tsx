@@ -64,10 +64,7 @@ export default function Navigation({ locale }: { locale: string }) {
         </Link>
 
         {/* Desktop links */}
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "2.5rem" }}
-          className="hidden md:flex"
-        >
+        <div className="nav-desktop">
           {NAV_LINKS.map(({ key, href }) => (
             <Link
               key={key}
@@ -139,7 +136,7 @@ export default function Navigation({ locale }: { locale: string }) {
 
         {/* Mobile burger */}
         <button
-          className="flex md:hidden"
+          className="nav-burger"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Меню"
           style={{
@@ -167,12 +164,13 @@ export default function Navigation({ locale }: { locale: string }) {
         </button>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile menu — items right-aligned (home/logo stays left in the bar) */}
       {menuOpen && (
         <div
-          className="flex md:hidden"
+          className="nav-mobile-menu"
           style={{
             flexDirection: "column",
+            alignItems: "flex-end",
             padding: "1rem 2rem 1.5rem",
             gap: "1.25rem",
             borderTop: "1px solid rgba(237,237,237,0.06)",
@@ -188,6 +186,7 @@ export default function Navigation({ locale }: { locale: string }) {
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 textDecoration: "none",
+                textAlign: "right",
                 color: isActive(href) ? "var(--accent)" : "var(--text-secondary)",
               }}
             >

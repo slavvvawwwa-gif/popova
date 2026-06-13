@@ -1,5 +1,17 @@
 import { defineType, defineField, defineArrayMember } from "sanity";
 
+// Entry with a date range (e.g. "2022–2023") + bilingual description.
+const periodEntry = () =>
+  defineArrayMember({
+    type: "object",
+    fields: [
+      defineField({ name: "period", title: "Период (напр. 2022–2023)", type: "string" }),
+      defineField({ name: "description_ru", title: "Описание (RU)", type: "text", rows: 2 }),
+      defineField({ name: "description_en", title: "Описание (EN)", type: "text", rows: 2 }),
+    ],
+    preview: { select: { title: "period", subtitle: "description_ru" } },
+  });
+
 /** Bio (singleton) — section 4 */
 export const bio = defineType({
   name: "bio",
@@ -59,27 +71,22 @@ export const bio = defineType({
       of: [defineArrayMember({ type: "block" })],
     }),
     defineField({
-      name: "timeline",
-      title: "Хронология",
+      name: "festivals",
+      title: "Участие в фестивалях, проектах, лабораториях",
       type: "array",
-      of: [
-        defineArrayMember({
-          type: "object",
-          fields: [
-            defineField({
-              name: "year",
-              title: "Год",
-              type: "string",
-              validation: (r) => r.required(),
-            }),
-            defineField({ name: "description_ru", title: "Описание (RU)", type: "text", rows: 2 }),
-            defineField({ name: "description_en", title: "Описание (EN)", type: "text", rows: 2 }),
-          ],
-          preview: {
-            select: { title: "year", subtitle: "description_ru" },
-          },
-        }),
-      ],
+      of: [periodEntry()],
+    }),
+    defineField({
+      name: "education",
+      title: "Дополнительное образование",
+      type: "array",
+      of: [periodEntry()],
+    }),
+    defineField({
+      name: "letters",
+      title: "Благодарственные письма",
+      type: "array",
+      of: [periodEntry()],
     }),
     defineField({
       name: "cv_file_ru",

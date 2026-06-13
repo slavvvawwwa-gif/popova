@@ -3,6 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useReveal, revealStyle } from "@/components/useReveal";
+import { useCursorPreview } from "@/components/CursorPreview";
 import Lightbox, { type LightboxImage } from "@/components/Lightbox";
 import LazyImage from "@/components/LazyImage";
 import { PortableText, type PortableTextComponents, type PortableTextBlock } from "@portabletext/react";
@@ -63,6 +64,7 @@ export default function WorkDetailView({
   const t = useTranslations("work");
   const tc = useTranslations("common");
   const locale = useLocale() as "ru" | "en";
+  const preview = useCursorPreview();
 
   // Back goes to the parent (if this is a sub-entity) or the section list.
   const backHref = work.parentSlug ? `${basePath}/${work.parentSlug}` : basePath;
@@ -159,12 +161,22 @@ export default function WorkDetailView({
               { label: t("performers"), value: work.performers },
             ]
               .filter((r) => r.value)
-              .map((row) => (
-                <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "1rem", padding: "0.875rem 0", borderBottom: "1px solid rgba(237,237,237,0.05)" }}>
-                  <span style={{ fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(237,237,237,0.3)" }}>{row.label}</span>
-                  <span style={{ fontSize: "0.875rem", color: "var(--text-secondary)", textAlign: "right" }}>{row.value}</span>
-                </div>
-              ))}
+              .map((row) => <MetaRow key={row.label} label={row.label} value={row.value} />)}
+
+            {/* "Дополнительно" — at the bottom of the credits block, justified */}
+            {work.creditsExtra && (
+              <div style={{ paddingTop: "1.25rem" }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-primary)", marginBottom: "0.6rem" }}>
+                  {t("extra")}
+                </span>
+                <p
+                  className="body"
+                  style={{ fontSize: "0.8rem", lineHeight: 1.7, textAlign: "justify", textJustify: "inter-word", hyphens: "auto", whiteSpace: "pre-line" }}
+                >
+                  {work.creditsExtra}
+                </p>
+              </div>
+            )}
           </div>
         </header>
 
@@ -192,21 +204,6 @@ export default function WorkDetailView({
           )}
         </section>
 
-        {/* "Дополнительно" — optional freeform block, justified (#10) */}
-        {work.creditsExtra && (
-          <section style={{ maxWidth: "720px", marginBottom: "5rem" }}>
-            <p style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "1rem" }}>
-              {t("extra")}
-            </p>
-            <p
-              className="body"
-              style={{ textAlign: "justify", textJustify: "inter-word", hyphens: "auto", whiteSpace: "pre-line" }}
-            >
-              {work.creditsExtra}
-            </p>
-          </section>
-        )}
-
         {/* Sub-entities (releases) for projects / labs */}
         {work.children.length > 0 && (
           <section style={{ marginBottom: "5rem" }}>
@@ -219,6 +216,8 @@ export default function WorkDetailView({
                   key={c.slug}
                   href={`${basePath}/${c.slug}`}
                   className="child-row"
+                  onMouseEnter={() => preview.show({ label: c.title, src: c.previewUrl ?? c.coverUrl ?? undefined })}
+                  onMouseLeave={() => preview.hide()}
                   style={{
                     display: "grid",
                     gridTemplateColumns: "72px 1fr auto",
@@ -347,6 +346,22 @@ export default function WorkDetailView({
         }
       `}</style>
     </>
+  );
+}
+
+function MetaRow({ label, value }: { label: string; value: string }) {
+  const [h, setH] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setH(true)}
+      onMouseLeave={() => setH(false)}
+      style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "1rem", padding: "0.875rem 0", borderBottom: "1px solid rgba(237,237,237,0.05)" }}
+    >
+      <span style={{ fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: h ? "var(--accent)" : "var(--text-primary)", transition: "color 200ms var(--ease-out-soft)" }}>
+        {label}
+      </span>
+      <span style={{ fontSize: "0.875rem", color: "var(--text-secondary)", textAlign: "right" }}>{value}</span>
+    </div>
   );
 }
 

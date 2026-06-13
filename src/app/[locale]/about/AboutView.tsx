@@ -5,7 +5,7 @@ import { useReveal, revealStyle } from "@/components/useReveal";
 import PhotoStack from "@/components/PhotoStack";
 import SectionHead from "@/components/SectionHead";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
-import type { BioData } from "@/sanity/lib/data";
+import type { BioData, PeriodEntry } from "@/sanity/lib/data";
 import type { PortableTextBlock } from "@portabletext/react";
 
 const ptComponents: PortableTextComponents = {
@@ -126,41 +126,12 @@ export default function AboutView({ bio }: { bio: BioData }) {
             )}
           </div>
 
-          {/* Timeline */}
-          {bio.timeline.length > 0 && (
-            <div ref={timelineReveal.ref} style={{ ...revealStyle(timelineReveal.visible, 120), marginTop: "var(--space-16)" }}>
-              <SectionHead style={{ marginBottom: "var(--space-8)" }}>{t("timeline_label")}</SectionHead>
-
-              {bio.timeline.map((item, i) => (
-                <div
-                  key={item.year + i}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "100px 1fr",
-                    gap: "2.5rem",
-                    alignItems: "baseline",
-                    padding: "1.75rem 0",
-                    borderBottom: "1px solid rgba(237,237,237,0.05)",
-                    borderTop: i === 0 ? "1px solid rgba(237,237,237,0.05)" : "none",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-serif)",
-                      fontSize: "1.375rem",
-                      fontWeight: 300,
-                      color: i === 0 ? "var(--accent)" : "var(--text-secondary)",
-                    }}
-                  >
-                    {item.year}
-                  </span>
-                  <p className="body" style={{ fontSize: "0.875rem", lineHeight: 1.7 }}>
-                    {item.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Three biography sections, each with date ranges */}
+          <div ref={timelineReveal.ref} style={{ ...revealStyle(timelineReveal.visible, 120), marginTop: "var(--space-16)" }}>
+            <PeriodBlock title={t("festivals")} entries={bio.festivals} />
+            <PeriodBlock title={t("education")} entries={bio.education} />
+            <PeriodBlock title={t("letters")} entries={bio.letters} />
+          </div>
         </div>
       </div>
 
@@ -170,5 +141,35 @@ export default function AboutView({ bio }: { bio: BioData }) {
         }
       `}</style>
     </div>
+  );
+}
+
+function PeriodBlock({ title, entries }: { title: string; entries: PeriodEntry[] }) {
+  if (!entries.length) return null;
+  return (
+    <section style={{ marginBottom: "var(--space-12)" }}>
+      <SectionHead style={{ marginBottom: "var(--space-6)" }}>{title}</SectionHead>
+      {entries.map((e, i) => (
+        <div
+          key={e.period + i}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "120px 1fr",
+            gap: "1.5rem",
+            alignItems: "baseline",
+            padding: "1.25rem 0",
+            borderBottom: "1px solid rgba(237,237,237,0.05)",
+            borderTop: i === 0 ? "1px solid rgba(237,237,237,0.05)" : "none",
+          }}
+        >
+          <span style={{ fontFamily: "var(--font-serif)", fontSize: "1.125rem", fontWeight: 300, color: "var(--text-secondary)" }}>
+            {e.period}
+          </span>
+          <p className="body" style={{ fontSize: "0.875rem", lineHeight: 1.7 }}>
+            {e.description}
+          </p>
+        </div>
+      ))}
+    </section>
   );
 }

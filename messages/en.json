@@ -4,7 +4,7 @@
     "about": "About",
     "works": "Works",
     "projects": "Projects",
-    "lab": "Lab",
+    "lab": "Labs",
     "contacts": "Contacts"
   },
   "home": {
@@ -18,7 +18,10 @@
     "title": "About",
     "bio_placeholder": "Biography text will appear here. A director with extensive experience in leading theatres across the country and abroad. Award laureate, participant of international festivals.",
     "download_cv": "Download CV",
-    "timeline_label": "Timeline"
+    "timeline_label": "Timeline",
+    "festivals": "Festivals, projects & labs",
+    "education": "Further education",
+    "letters": "Letters of appreciation"
   },
   "works": {
     "title": "Works",
@@ -69,7 +72,7 @@
     "no_results": "No projects found"
   },
   "lab": {
-    "title": "Laboratory",
+    "title": "Labs",
     "filter_all": "All",
     "filter_year": "Year",
     "current": "Current",

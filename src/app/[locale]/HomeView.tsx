@@ -364,7 +364,7 @@ export default function HomeView({
         {/* Large ghost serif number — decorative, desktop only */}
         <span
           aria-hidden="true"
-          className="hidden lg:block"
+          className="hero-ghost"
           style={{
             position: "absolute",
             right: "-0.5rem",

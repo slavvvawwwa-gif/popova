@@ -11,7 +11,7 @@ export const homeQuery = /* groq */ `
 // Shared card projection (catalog tiles / children / featured)
 const CARD = /* groq */ `
   "slug": slug.current,
-  title_ru, title_en, theatre, theatre_en, year, kind, role, tags, genre_en, status, featured,
+  title_ru, title_en, theatre, theatre_en, year, premiere, kind, role, tags, genre_en, status, featured,
   short_description_ru, short_description_en,
   cover_image, preview_image
 `;
@@ -22,9 +22,10 @@ export const performancesQuery = /* groq */ `
   ${CARD}
 }`;
 
-// Featured across all kinds (the "В избранное" checkbox)
+// Featured across all kinds (the "В избранное" checkbox). Ordered by proximity
+// to now in the data layer, then sliced to 3.
 export const featuredPerformancesQuery = /* groq */ `
-*[_type == "performance" && featured == true && !defined(parent)] | order(year desc, _createdAt desc)[0...3] {
+*[_type == "performance" && featured == true && !defined(parent)] {
   ${CARD}
 }`;
 
@@ -69,7 +70,9 @@ export const bioQuery = /* groq */ `
   name_ru, name_en, role_ru, role_en, photo,
   gallery[]{ asset, alt },
   bio_text_ru, bio_text_en,
-  timeline[]{ year, description_ru, description_en },
+  festivals[]{ period, description_ru, description_en },
+  education[]{ period, description_ru, description_en },
+  letters[]{ period, description_ru, description_en },
   "cv_ru": cv_file_ru.asset->url,
   "cv_en": cv_file_en.asset->url
 }`;

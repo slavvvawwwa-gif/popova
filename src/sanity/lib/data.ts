@@ -6,6 +6,7 @@
 import { client } from "./client";
 import { urlForImage } from "./image";
 import { pick, pickField } from "./localize";
+import { byProximity } from "@/lib/sort";
 import {
   homeQuery,
   performancesQuery,
@@ -39,6 +40,7 @@ export interface WorkCard {
   status: "current" | "archive";
   featured?: boolean;
   kind: Kind;
+  premiere: string;
   shortDescription: string;
   coverUrl: string | null;
   previewUrl: string | null;
@@ -98,13 +100,19 @@ export interface PlaybillItem {
   isPast: boolean;
 }
 
+export interface PeriodEntry {
+  period: string;
+  description: string;
+}
 export interface BioData {
   name: string;
   role: string;
   photoUrl: string | null;
   gallery: { url: string | null; alt: string }[];
   text: unknown[] | null;
-  timeline: { year: string; description: string }[];
+  festivals: PeriodEntry[];
+  education: PeriodEntry[];
+  letters: PeriodEntry[];
   cvRu: string | null;
   cvEn: string | null;
 }
@@ -149,6 +157,7 @@ function mapCard(r: Record<string, unknown>, locale: Locale, coverWidth = 1400):
     status: (r.status as "current" | "archive") ?? "archive",
     featured: Boolean(r.featured),
     kind: (r.kind as Kind) ?? "performance",
+    premiere: (r.premiere as string) ?? "",
     shortDescription: pick(r, "short_description", locale),
     coverUrl: urlForImage(r.cover_image as never)?.width(coverWidth).quality(90).url() ?? null,
     previewUrl:
@@ -179,13 +188,15 @@ export async function getPerformances(locale: Locale, kind: Kind = "performance"
 
 export async function getFeaturedPerformances(locale: Locale): Promise<WorkCard[]> {
   const fb = () =>
-    [...fallbackWorks(locale, "performance"), ...fallbackWorks(locale, "project"), ...fallbackWorks(locale, "lab")]
-      .filter((w) => w.featured)
-      .slice(0, 3);
+    byProximity(
+      [...fallbackWorks(locale, "performance"), ...fallbackWorks(locale, "project"), ...fallbackWorks(locale, "lab")].filter(
+        (w) => w.featured
+      )
+    ).slice(0, 3);
   if (!client) return fb();
   const rows = await client.fetch<Record<string, unknown>[]>(featuredPerformancesQuery, {}, cache(["performance"]));
   if (!rows?.length) return fb();
-  return rows.map((r) => mapCard(r, locale, 1800));
+  return byProximity(rows.map((r) => mapCard(r, locale, 1800))).slice(0, 3);
 }
 
 export async function getPerformance(
@@ -298,13 +309,19 @@ export async function getBio(locale: Locale): Promise<BioData> {
     photoUrl: urlForImage(r.photo as never)?.width(1100).quality(90).url() ?? null,
     gallery,
     text: pickField<unknown[]>(r, "bio_text", locale),
-    timeline: ((r.timeline as Record<string, unknown>[]) ?? []).map((tl) => ({
-      year: (tl.year as string) ?? "",
-      description: pick(tl, "description", locale),
-    })),
+    festivals: mapPeriods(r.festivals, locale),
+    education: mapPeriods(r.education, locale),
+    letters: mapPeriods(r.letters, locale),
     cvRu: (r.cv_ru as string) ?? null,
     cvEn: (r.cv_en as string) ?? null,
   };
+}
+
+function mapPeriods(arr: unknown, locale: Locale): PeriodEntry[] {
+  return ((arr as Record<string, unknown>[]) ?? []).map((e) => ({
+    period: (e.period as string) ?? "",
+    description: pick(e, "description", locale),
+  }));
 }
 
 /* ─── Contacts (singleton) ───────────────────────────────────────── */

@@ -4,9 +4,21 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useReveal, revealStyle } from "@/components/useReveal";
 import { useCursorPreview } from "@/components/CursorPreview";
+import LazyImage from "@/components/LazyImage";
 import { smoothScrollTo } from "@/lib/smoothScroll";
+import { byProximity } from "@/lib/sort";
 import { useState } from "react";
 import type { WorkCard } from "@/sanity/lib/data";
+
+// Bento span pattern (12-col grid) — varied tile sizes, dense packing.
+const SPANS: { c: number; r: number }[] = [
+  { c: 6, r: 2 },
+  { c: 3, r: 1 },
+  { c: 3, r: 1 },
+  { c: 4, r: 2 },
+  { c: 4, r: 1 },
+  { c: 4, r: 1 },
+];
 
 function FilterButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -53,7 +65,8 @@ export default function WorksView({
   };
 
   const filtered = activeYear ? works.filter((w) => w.year === activeYear) : works;
-  const current = filtered.filter((w) => w.status === "current");
+  // #8 — current items ordered by closeness to "now"
+  const current = byProximity(filtered.filter((w) => w.status === "current"));
   const archive = filtered.filter((w) => w.status === "archive");
 
   return (
@@ -93,16 +106,19 @@ export default function WorksView({
       {/* Current */}
       {current.length > 0 && (
         <section ref={listReveal.ref} style={{ ...revealStyle(listReveal.visible), marginBottom: "5rem" }}>
-          <p style={{ fontSize: "0.6rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "2rem" }}>
-            {t("current")}
-          </p>
+          {/* #3 — "Текущие" heading only for спектакли */}
+          {section === "works" && (
+            <p style={{ fontSize: "0.6rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "2rem" }}>
+              {t("current")}
+            </p>
+          )}
 
-          {/* Masonry "wall": covers at natural aspect (no crop) packed with
-              minimal gaps; items without a cover become text tiles. */}
-          <div className="works-wall">
-            {current.map((work, i) => (
-              <GridCard key={work.slug} work={work} index={i} basePath={basePath} />
-            ))}
+          {/* #9 — dense bento: varied tile sizes, covers fill cells, no gaps */}
+          <div className="works-bento">
+            {current.map((work, i) => {
+              const s = SPANS[i % SPANS.length];
+              return <GridCard key={work.slug} work={work} index={i} basePath={basePath} colSpan={s.c} rowSpan={s.r} />;
+            })}
           </div>
         </section>
       )}
@@ -147,10 +163,18 @@ export default function WorksView({
       )}
 
       <style>{`
-        .works-wall { column-count: 3; column-gap: 2px; }
-        .works-wall > * { break-inside: avoid; margin-bottom: 2px; display: block; width: 100%; }
-        @media (max-width: 1023px) { .works-wall { column-count: 2; } }
-        @media (max-width: 599px) { .works-wall { column-count: 1; } }
+        .works-bento {
+          display: grid;
+          grid-template-columns: repeat(12, 1fr);
+          grid-auto-rows: clamp(120px, 12vw, 200px);
+          grid-auto-flow: dense;
+          gap: 2px;
+        }
+        @media (max-width: 1023px) { .works-bento { grid-auto-rows: clamp(120px, 22vw, 200px); } }
+        @media (max-width: 599px) {
+          .works-bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 42vw; }
+          .works-bento > .bento-item { grid-column: span 2 !important; grid-row: span 1 !important; }
+        }
         @media (max-width: 767px) {
           .archive-row { grid-template-columns: 50px 1fr !important; }
           .archive-row span:nth-child(3),
@@ -165,83 +189,48 @@ function GridCard({
   work,
   index,
   basePath,
+  colSpan,
+  rowSpan,
 }: {
   work: WorkCard;
   index: number;
   basePath: string;
+  colSpan: number;
+  rowSpan: number;
 }) {
   const [hovered, setHovered] = useState(false);
-  const hasCover = Boolean(work.coverUrl);
 
-  // Text tile (no cover): a tall serif block so the wall has no empty gaps.
-  if (!hasCover) {
-    return (
-      <Link
-        href={`${basePath}/${work.slug}`}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={{ textDecoration: "none", display: "block", cursor: "pointer" }}
-      >
-        <article
-          style={{
-            backgroundColor: "var(--bg-surface)",
-            padding: "var(--space-8) var(--space-6)",
-            minHeight: "clamp(220px, 34vw, 340px)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end",
-            position: "relative",
-            overflow: "hidden",
-            borderLeft: hovered ? "2px solid var(--accent)" : "2px solid transparent",
-            transition: "border-color 250ms var(--ease-out-soft)",
-          }}
-        >
-          <span aria-hidden="true" style={{ position: "absolute", top: "var(--space-4)", right: "var(--space-4)", fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-secondary)" }}>
-            {work.year}
-          </span>
-          <p style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
-            {work.theatre}
-          </p>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(1.5rem, 3vw, 2.4rem)", fontWeight: 300, lineHeight: 1.05, color: "var(--text-primary)", marginBottom: "0.75rem" }}>
-            {work.title}
-          </h2>
-          {work.shortDescription && (
-            <p className="body" style={{ fontSize: "0.85rem", lineHeight: 1.6, marginBottom: "0.75rem" }}>
-              {work.shortDescription}
-            </p>
-          )}
-          {work.genre && (
-            <span style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: hovered ? "var(--accent)" : "var(--text-secondary)", transition: "color 250ms var(--ease-out-soft)" }}>
-              {work.genre}
-            </span>
-          )}
-        </article>
-      </Link>
-    );
-  }
-
-  // Cover tile: image at its natural aspect (no crop) + title overlay.
   return (
     <Link
       href={`${basePath}/${work.slug}`}
+      className="bento-item"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{ textDecoration: "none", display: "block", cursor: "pointer" }}
+      style={{
+        textDecoration: "none",
+        display: "block",
+        gridColumn: `span ${colSpan}`,
+        gridRow: `span ${rowSpan}`,
+        cursor: "pointer",
+      }}
     >
-      <article style={{ position: "relative", overflow: "hidden", backgroundColor: "var(--bg-surface)" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={work.coverUrl as string}
-          alt={work.title}
-          loading="lazy"
+      <article style={{ position: "relative", overflow: "hidden", backgroundColor: "var(--bg-surface)", width: "100%", height: "100%" }}>
+        {/* Cover fills the cell (object-fit cover); scales on hover */}
+        <span
           style={{
-            display: "block",
-            width: "100%",
-            height: "auto",
+            position: "absolute",
+            inset: 0,
             transform: hovered ? "scale(1.04)" : "scale(1)",
             transition: "transform 600ms var(--ease-out-expo)",
           }}
-        />
+        >
+          <LazyImage
+            src={work.coverUrl ?? undefined}
+            alt={work.title}
+            placeholderLabel={String(index + 1).padStart(2, "0")}
+            style={{ position: "absolute", inset: 0 }}
+          />
+        </span>
 
         {/* Bottom scrim for legibility */}
         <span
@@ -249,8 +238,8 @@ function GridCard({
           style={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(to top, rgba(10,10,10,0.82) 0%, rgba(10,10,10,0.18) 42%, transparent 70%)",
-            opacity: hovered ? 1 : 0.9,
+            background: "linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.2) 45%, transparent 72%)",
+            opacity: hovered ? 1 : 0.92,
             transition: "opacity 420ms var(--ease-out-expo)",
           }}
         />

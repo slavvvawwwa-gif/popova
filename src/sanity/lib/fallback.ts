@@ -60,6 +60,7 @@ export function fallbackWorks(locale: Locale, kind: Kind = "performance"): WorkC
     status: w.status,
     featured: w.featured,
     kind: w.kind,
+    premiere: `${w.year}-09-15`,
     shortDescription: t(
       locale,
       "Краткое описание появится здесь после наполнения через Sanity.",
@@ -202,11 +203,15 @@ export function fallbackBio(locale: Locale): BioData {
       alt: t(locale, `Фото ${i + 1}`, `Photo ${i + 1}`),
     })),
     text: null,
-    timeline: [
-      { year: "2024", description: t(locale, "Постановка «Гамлет» в Театре А. Участие в фестивале «Золотая маска».", "Production of Hamlet at Theatre A. Golden Mask festival.") },
-      { year: "2022", description: t(locale, "Международный проект в Théâtre de la Ville, Париж.", "International project at Théâtre de la Ville, Paris.") },
-      { year: "2020", description: t(locale, "Дебютная авторская постановка.", "Debut author's production.") },
-      { year: "2018", description: t(locale, "Окончание ГИТИСа (режиссёрский факультет).", "Graduated from GITIS (Directing Department).") },
+    festivals: [
+      { period: "2022–2023", description: t(locale, "Лаборатория молодой режиссуры, Москва.", "Young Directors Lab, Moscow.") },
+      { period: "2021", description: t(locale, "Международный фестиваль, Париж.", "International festival, Paris.") },
+    ],
+    education: [
+      { period: "2018–2020", description: t(locale, "ГИТИС, режиссёрский факультет.", "GITIS, Directing Department.") },
+    ],
+    letters: [
+      { period: "2023", description: t(locale, "Благодарность Министерства культуры.", "Letter of appreciation, Ministry of Culture.") },
     ],
     cvRu: null,
     cvEn: null,

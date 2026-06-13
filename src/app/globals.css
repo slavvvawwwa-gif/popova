@@ -82,6 +82,20 @@ body {
   font-family: var(--font-sans);
 }
 
+/* ─── Navigation responsive (explicit, not Tailwind-dependent) ───── */
+.nav-desktop { display: none; align-items: center; gap: 2.5rem; }
+.nav-burger { display: inline-flex; }
+.nav-mobile-menu { display: flex; }
+@media (min-width: 768px) {
+  .nav-desktop { display: flex; }
+  .nav-burger,
+  .nav-mobile-menu { display: none !important; }
+}
+
+/* Desktop-only decorative ghost numeral on the hero */
+.hero-ghost { display: none; }
+@media (min-width: 1024px) { .hero-ghost { display: block; } }
+
 /* ─── Typography primitives (systematized — Refactoring UI) ──────── */
 
 /* Small uppercase label used as section eyebrow / kicker */
