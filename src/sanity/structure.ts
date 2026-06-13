@@ -18,7 +18,9 @@ export const structure: StructureResolver = (S) =>
         .id("contacts")
         .child(S.document().schemaType("contacts").documentId("contacts")),
       S.divider(),
-      // One document type (performance) split by `kind` into three catalogs
+      // One document type (performance) split by `kind` into three catalogs.
+      // Each list's create button uses the matching template so a new doc gets
+      // the correct `kind` and appears in that list.
       S.listItem()
         .title("Спектакли")
         .id("perf-performance")
@@ -26,7 +28,7 @@ export const structure: StructureResolver = (S) =>
           S.documentList()
             .title("Спектакли")
             .filter('_type == "performance" && kind == "performance"')
-            .initialValueTemplates([])
+            .initialValueTemplates([S.initialValueTemplateItem("new-performance")])
         ),
       S.listItem()
         .title("Проекты")
@@ -35,6 +37,7 @@ export const structure: StructureResolver = (S) =>
           S.documentList()
             .title("Проекты")
             .filter('_type == "performance" && kind == "project"')
+            .initialValueTemplates([S.initialValueTemplateItem("new-project")])
         ),
       S.listItem()
         .title("Лаборатория")
@@ -43,6 +46,7 @@ export const structure: StructureResolver = (S) =>
           S.documentList()
             .title("Лаборатория")
             .filter('_type == "performance" && kind == "lab"')
+            .initialValueTemplates([S.initialValueTemplateItem("new-lab")])
         ),
       S.divider(),
       S.documentTypeListItem("pressItem").title("Пресса / Награды"),

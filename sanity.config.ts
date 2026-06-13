@@ -11,7 +11,17 @@ export default defineConfig({
   basePath: "/studio",
   projectId: studioProjectId,
   dataset,
-  schema,
+  // "New document" templates that preset `kind`, so creating from each catalog
+  // list (Спектакли / Проекты / Лаборатория) lands in the right section.
+  schema: {
+    types: schema.types,
+    templates: (prev) => [
+      ...prev,
+      { id: "new-performance", title: "Спектакль", schemaType: "performance", value: { kind: "performance" } },
+      { id: "new-project", title: "Проект", schemaType: "performance", value: { kind: "project" } },
+      { id: "new-lab", title: "Лаборатория", schemaType: "performance", value: { kind: "lab" } },
+    ],
+  },
   plugins: [
     structureTool({ structure }),
     visionTool({ defaultApiVersion: apiVersion }),
