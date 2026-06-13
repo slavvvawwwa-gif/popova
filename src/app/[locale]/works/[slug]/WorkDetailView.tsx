@@ -169,8 +169,8 @@ export default function WorkDetailView({ work }: { work: WorkDetail }) {
           style={{ width: "100%", marginBottom: "4rem" }}
         />
 
-        {/* Full description */}
-        <section ref={descReveal.ref} style={{ ...revealStyle(descReveal.visible), maxWidth: "720px", marginBottom: "5rem" }}>
+        {/* Full description — justified, accent drop cap on first letter */}
+        <section ref={descReveal.ref} className="work-desc" style={{ ...revealStyle(descReveal.visible), maxWidth: "720px", marginBottom: "5rem" }}>
           {work.fullDescription ? (
             <PortableText value={work.fullDescription as PortableTextBlock[]} components={ptComponents} />
           ) : (

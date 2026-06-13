@@ -5,6 +5,7 @@ import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import Navigation from "@/components/Navigation";
 import { CursorPreviewProvider } from "@/components/CursorPreview";
+import BackToTop from "@/components/BackToTop";
 import "../globals.css";
 
 export async function generateMetadata({
@@ -54,6 +55,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <CursorPreviewProvider>
             <Navigation locale={locale} />
+            <BackToTop />
             <main className="flex-1">{children}</main>
             <footer
             style={{

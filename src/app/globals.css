@@ -138,6 +138,24 @@ body {
   letter-spacing: 0.06em;
 }
 
+/* ─── Full work description: justified + accent drop cap ──────────── */
+.work-desc p {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+/* "Красная строка" — large italic accent initial on the first paragraph */
+.work-desc > p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+  font-size: 3.6em;
+  line-height: 0.72;
+  padding: 0.04em 0.1em 0 0;
+}
+
 /* ─── Animated underline (scaleX, GPU-friendly) ──────────────────── */
 .u-link {
   position: relative;

@@ -40,3 +40,24 @@ export function smoothScrollTo(target: string | HTMLElement, offset = 80) {
 
   requestAnimationFrame(step);
 }
+
+/** Smoothly scroll to the very top of the page (instant under reduced motion). */
+export function scrollToTop() {
+  if (typeof window === "undefined") return;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) {
+    window.scrollTo(0, 0);
+    return;
+  }
+  const start = window.scrollY;
+  const duration = Math.min(900, Math.max(350, start * 0.5));
+  let startTime: number | null = null;
+  const ease = (t: number) => 1 - Math.pow(1 - t, 3); // easeOutCubic
+  const step = (now: number) => {
+    if (startTime === null) startTime = now;
+    const progress = Math.min(1, (now - startTime) / duration);
+    window.scrollTo(0, start * (1 - ease(progress)));
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}

@@ -147,7 +147,7 @@ export async function getPerformances(locale: Locale, kind: Kind = "performance"
     genre: ((r.tags as string[]) ?? [])[0] ?? "",
     status: (r.status as "current" | "archive") ?? "archive",
     featured: Boolean(r.featured),
-    coverUrl: urlForImage(r.cover_image as never)?.width(900).url() ?? null,
+    coverUrl: urlForImage(r.cover_image as never)?.width(1400).quality(88).url() ?? null,
   }));
 }
 
@@ -162,7 +162,7 @@ export async function getFeaturedPerformances(locale: Locale): Promise<WorkCard[
     year: (r.year as number) ?? null,
     genre: ((r.tags as string[]) ?? [])[0] ?? "",
     status: (r.status as "current" | "archive") ?? "current",
-    coverUrl: urlForImage(r.cover_image as never)?.width(1200).url() ?? null,
+    coverUrl: urlForImage(r.cover_image as never)?.width(1800).quality(90).url() ?? null,
   }));
 }
 
@@ -175,7 +175,7 @@ export async function getPerformance(
   if (!r) return fallbackWorkDetail(slug, locale);
 
   const gallery = ((r.gallery as Record<string, unknown>[]) ?? []).map((g) => ({
-    url: urlForImage(g as never)?.width(1400).url() ?? null,
+    url: urlForImage(g as never)?.width(1600).quality(88).url() ?? null,
     alt: (g.alt as string) ?? "",
     caption: pick(g, "caption", locale),
   }));
@@ -210,7 +210,7 @@ export async function getPerformance(
     creditsExtra: pick(r, "credits_extra", locale),
     shortDescription: pick(r, "short_description", locale),
     fullDescription: pickField<unknown[]>(r, "full_description", locale),
-    coverUrl: urlForImage(r.cover_image as never)?.width(1600).url() ?? null,
+    coverUrl: urlForImage(r.cover_image as never)?.width(2200).quality(90).url() ?? null,
     gallery,
     videos: ((r.video_links as VideoLink[]) ?? []).filter((v) => v?.url),
     press,
@@ -259,7 +259,7 @@ export async function getBio(locale: Locale): Promise<BioData> {
   return {
     name: pick(r, "name", locale),
     role: pick(r, "role", locale),
-    photoUrl: urlForImage(r.photo as never)?.width(800).url() ?? null,
+    photoUrl: urlForImage(r.photo as never)?.width(1100).quality(90).url() ?? null,
     text: pickField<unknown[]>(r, "bio_text", locale),
     timeline: ((r.timeline as Record<string, unknown>[]) ?? []).map((tl) => ({
       year: (tl.year as string) ?? "",
