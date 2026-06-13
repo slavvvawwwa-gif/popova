@@ -14,6 +14,16 @@ const SECTION_PATH: Record<string, string> = {
 const hrefFor = (c?: WorkCardData | null) =>
   c ? `${SECTION_PATH[c.kind] ?? "/works"}/${c.slug}` : "/works";
 
+// Bento span pattern for the home Featured grid (12-col).
+const FEATURED_SPANS: { c: number; r: number }[] = [
+  { c: 7, r: 2 },
+  { c: 5, r: 1 },
+  { c: 5, r: 1 },
+  { c: 4, r: 1 },
+  { c: 4, r: 2 },
+  { c: 4, r: 1 },
+];
+
 /* ─── Scroll-reveal hook ──────────────────────────────────────────── */
 function useReveal() {
   const ref = useRef<HTMLElement>(null);
@@ -49,7 +59,8 @@ function WorkCard({
   genre,
   index,
   coverUrl,
-  style: extraStyle,
+  colSpan = 4,
+  rowSpan = 1,
 }: {
   href: string;
   title: React.ReactNode;
@@ -58,14 +69,16 @@ function WorkCard({
   genre: string;
   index: number;
   coverUrl?: string;
-  style?: React.CSSProperties;
+  colSpan?: number;
+  rowSpan?: number;
 }) {
   const [hovered, setHovered] = useState(false);
 
   return (
     <Link
       href={href}
-      style={{ textDecoration: "none", display: "block", height: "100%", ...extraStyle }}
+      className="bento-item"
+      style={{ textDecoration: "none", display: "block", height: "100%", gridColumn: `span ${colSpan}`, gridRow: `span ${rowSpan}` }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -94,7 +107,7 @@ function WorkCard({
           <LazyImage
             src={coverUrl}
             alt={typeof title === "string" ? title : ""}
-            placeholderLabel={["I", "II", "III"][index]}
+            placeholderLabel={String(index + 1).padStart(2, "0")}
             style={{ position: "absolute", inset: 0 }}
           />
         </span>
@@ -202,9 +215,6 @@ export default function HomeView({
 
   const heroReveal = useReveal();
   const featuredReveal = useReveal();
-
-  // Map up to three featured works onto the bespoke A/B/C layout.
-  const cards = [0, 1, 2].map((i) => featured[i] ?? null);
 
   return (
     <>
@@ -433,81 +443,26 @@ export default function HomeView({
           </Link>
         </div>
 
-        {/*
-          Desktop grid — named areas:
-          ┌─────────────────────────┬──────────────────┐
-          │                         │      card-b       │
-          │         card-a          ├──────────────────┤
-          │     (tall, 2 rows)      │      card-c       │
-          └─────────────────────────┴──────────────────┘
-          Columns: 60% | 40%
-          Rows: ~260px | ~260px  (equal halves)
-        */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "60% 40%",
-            gridTemplateRows: "260px 260px",
-            gridTemplateAreas: `"card-a card-b" "card-a card-c"`,
-            gap: "2px",
-          }}
-          className="featured-grid"
-        >
-          <div style={{ gridArea: "card-a" }}>
-            <WorkCard
-              href={hrefFor(cards[0])}
-              title={cards[0]?.title ?? "—"}
-              theatre={cards[0]?.theatre ?? ""}
-              year={cards[0]?.year ? String(cards[0].year) : ""}
-              genre={cards[0]?.genre ?? ""}
-              coverUrl={cards[0]?.coverUrl ?? undefined}
-              index={0}
-              style={{ minHeight: "100%" }}
-            />
-          </div>
-          <div style={{ gridArea: "card-b" }}>
-            <WorkCard
-              href={hrefFor(cards[1])}
-              title={cards[1]?.title ?? "—"}
-              theatre={cards[1]?.theatre ?? ""}
-              year={cards[1]?.year ? String(cards[1].year) : ""}
-              genre={cards[1]?.genre ?? ""}
-              coverUrl={cards[1]?.coverUrl ?? undefined}
-              index={1}
-            />
-          </div>
-          <div style={{ gridArea: "card-c" }}>
-            <WorkCard
-              href={hrefFor(cards[2])}
-              title={cards[2]?.title ?? "—"}
-              theatre={cards[2]?.theatre ?? ""}
-              year={cards[2]?.year ? String(cards[2].year) : ""}
-              genre={cards[2]?.genre ?? ""}
-              coverUrl={cards[2]?.coverUrl ?? undefined}
-              index={2}
-              style={{ backgroundColor: "#141414" }}
-            />
-          </div>
+        {/* Dense bento of ALL featured items (any count) */}
+        <div className="bento-grid">
+          {featured.map((w, i) => {
+            const s = FEATURED_SPANS[i % FEATURED_SPANS.length];
+            return (
+              <WorkCard
+                key={w.slug}
+                href={hrefFor(w)}
+                title={w.title}
+                theatre={w.theatre}
+                year={w.year ? String(w.year) : ""}
+                genre={w.genre}
+                coverUrl={w.coverUrl ?? undefined}
+                index={i}
+                colSpan={s.c}
+                rowSpan={s.r}
+              />
+            );
+          })}
         </div>
-
-        <style>{`
-          @media (max-width: 639px) {
-            .featured-grid {
-              grid-template-columns: 1fr !important;
-              grid-template-rows: 300px 220px 220px !important;
-              grid-template-areas:
-                "card-a"
-                "card-b"
-                "card-c" !important;
-            }
-          }
-          @media (min-width: 640px) and (max-width: 1023px) {
-            .featured-grid {
-              grid-template-columns: 55% 45% !important;
-              grid-template-rows: 240px 240px !important;
-            }
-          }
-        `}</style>
       </section>
     </>
   );

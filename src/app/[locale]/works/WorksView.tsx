@@ -114,7 +114,7 @@ export default function WorksView({
           )}
 
           {/* #9 — dense bento: varied tile sizes, covers fill cells, no gaps */}
-          <div className="works-bento">
+          <div className="bento-grid">
             {current.map((work, i) => {
               const s = SPANS[i % SPANS.length];
               return <GridCard key={work.slug} work={work} index={i} basePath={basePath} colSpan={s.c} rowSpan={s.r} />;
@@ -163,18 +163,6 @@ export default function WorksView({
       )}
 
       <style>{`
-        .works-bento {
-          display: grid;
-          grid-template-columns: repeat(12, 1fr);
-          grid-auto-rows: clamp(120px, 12vw, 200px);
-          grid-auto-flow: dense;
-          gap: 2px;
-        }
-        @media (max-width: 1023px) { .works-bento { grid-auto-rows: clamp(120px, 22vw, 200px); } }
-        @media (max-width: 599px) {
-          .works-bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 42vw; }
-          .works-bento > .bento-item { grid-column: span 2 !important; grid-row: span 1 !important; }
-        }
         @media (max-width: 767px) {
           .archive-row { grid-template-columns: 50px 1fr !important; }
           .archive-row span:nth-child(3),

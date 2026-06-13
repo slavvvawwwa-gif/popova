@@ -192,11 +192,12 @@ export async function getFeaturedPerformances(locale: Locale): Promise<WorkCard[
       [...fallbackWorks(locale, "performance"), ...fallbackWorks(locale, "project"), ...fallbackWorks(locale, "lab")].filter(
         (w) => w.featured
       )
-    ).slice(0, 3);
+    );
   if (!client) return fb();
   const rows = await client.fetch<Record<string, unknown>[]>(featuredPerformancesQuery, {}, cache(["performance"]));
   if (!rows?.length) return fb();
-  return byProximity(rows.map((r) => mapCard(r, locale, 1800))).slice(0, 3);
+  // All items marked "В избранное", ordered by proximity to now
+  return byProximity(rows.map((r) => mapCard(r, locale, 1800)));
 }
 
 export async function getPerformance(
