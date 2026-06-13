@@ -29,9 +29,19 @@
     "no_results": "No works found"
   },
   "work": {
-    "theatre": "Theatre",
+    "theatre": "Location",
     "year": "Year",
+    "premiere": "Premiere",
     "genre": "Genre",
+    "role": "Director",
+    "playwright": "Playwright",
+    "artist": "Artist",
+    "lighting": "Lighting Designer",
+    "set_designer": "Set Designer",
+    "composer": "Composer",
+    "choreographer": "Choreographer",
+    "performers": "Performers",
+    "extra": "Additional",
     "gallery": "Photos",
     "video": "Video",
     "press_about": "Press about this work"

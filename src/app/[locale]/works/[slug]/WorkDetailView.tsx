@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useReveal, revealStyle } from "@/components/useReveal";
 import Lightbox, { type LightboxImage } from "@/components/Lightbox";
@@ -42,9 +42,21 @@ function toEmbedUrl(url: string): string | null {
   return null;
 }
 
+function fmtPremiere(iso: string, locale: "ru" | "en") {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString(locale === "en" ? "en-GB" : "ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 export default function WorkDetailView({ work }: { work: WorkDetail }) {
   const t = useTranslations("work");
   const tc = useTranslations("common");
+  const locale = useLocale() as "ru" | "en";
 
   const headerReveal = useReveal();
   const descReveal = useReveal(80);
@@ -126,9 +138,17 @@ export default function WorkDetailView({ work }: { work: WorkDetail }) {
             {[
               { label: t("theatre"), value: work.theatre },
               { label: t("year"), value: work.year ? String(work.year) : "" },
+              { label: t("premiere"), value: fmtPremiere(work.premiere, locale) },
               { label: t("genre"), value: work.genre },
-              { label: "Постановщик", value: work.role },
-              { label: "Художник", value: work.artist },
+              { label: t("role"), value: work.role },
+              { label: t("playwright"), value: work.playwright },
+              { label: t("artist"), value: work.artist },
+              { label: t("lighting"), value: work.lightingDesigner },
+              { label: t("set_designer"), value: work.setDesigner },
+              { label: t("composer"), value: work.composer },
+              { label: t("choreographer"), value: work.choreographer },
+              { label: t("performers"), value: work.performers },
+              { label: t("extra"), value: work.creditsExtra },
             ]
               .filter((r) => r.value)
               .map((row) => (
@@ -176,13 +196,13 @@ export default function WorkDetailView({ work }: { work: WorkDetail }) {
           </section>
         )}
 
-        {/* Video */}
-        <section ref={videoReveal.ref} style={{ ...revealStyle(videoReveal.visible), marginBottom: "5rem" }}>
-          <p style={{ fontSize: "0.6rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "2rem" }}>
-            {t("video")}
-          </p>
+        {/* Video — rendered only when at least one video is present */}
+        {work.videos.length > 0 && (
+          <section ref={videoReveal.ref} style={{ ...revealStyle(videoReveal.visible), marginBottom: "5rem" }}>
+            <p style={{ fontSize: "0.6rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "2rem" }}>
+              {t("video")}
+            </p>
 
-          {work.videos.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "2rem", maxWidth: "860px" }}>
               {work.videos.map((v, i) => {
                 const embed = toEmbedUrl(v.url);
@@ -208,19 +228,8 @@ export default function WorkDetailView({ work }: { work: WorkDetail }) {
                 );
               })}
             </div>
-          ) : (
-            <div style={{ maxWidth: "860px", aspectRatio: "16/9", backgroundColor: "var(--bg-surface)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
-              <span style={{ width: "64px", height: "64px", border: "1px solid rgba(237,237,237,0.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-secondary)" }}>
-                <svg width="18" height="20" viewBox="0 0 18 20" fill="none" aria-hidden="true">
-                  <path d="M2 1L16 10L2 19V1Z" stroke="currentColor" strokeWidth="1.2" />
-                </svg>
-              </span>
-              <span style={{ fontSize: "0.6rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-secondary)" }}>
-                YouTube / Vimeo — добавить через Sanity
-              </span>
-            </div>
-          )}
-        </section>
+          </section>
+        )}
 
         {/* Related press */}
         {work.press.length > 0 && (

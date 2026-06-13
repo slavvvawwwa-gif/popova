@@ -25,7 +25,9 @@ export const featuredPerformancesQuery = /* groq */ `
 export const performanceBySlugQuery = /* groq */ `
 *[_type == "performance" && slug.current == $slug][0] {
   "slug": slug.current,
-  title_ru, title_en, theatre, year, role, artist, tags, status,
+  title_ru, title_en, theatre, year, premiere, role, tags, status,
+  playwright, artist, lighting_designer, set_designer, composer, choreographer, performers,
+  credits_extra_ru, credits_extra_en,
   short_description_ru, short_description_en,
   full_description_ru, full_description_en,
   cover_image,

@@ -64,8 +64,16 @@ export interface PressEntry {
 }
 
 export interface WorkDetail extends WorkCard {
+  premiere: string; // ISO date
   role: string;
+  playwright: string;
   artist: string;
+  lightingDesigner: string;
+  setDesigner: string;
+  composer: string;
+  choreographer: string;
+  performers: string;
+  creditsExtra: string;
   shortDescription: string;
   // Portable Text blocks (rendered with @portabletext/react)
   fullDescription: unknown[] | null;
@@ -190,8 +198,16 @@ export async function getPerformance(
     year: (r.year as number) ?? null,
     genre: ((r.tags as string[]) ?? [])[0] ?? "",
     status: (r.status as "current" | "archive") ?? "archive",
+    premiere: (r.premiere as string) ?? "",
     role: (r.role as string) ?? "",
+    playwright: (r.playwright as string) ?? "",
     artist: (r.artist as string) ?? "",
+    lightingDesigner: (r.lighting_designer as string) ?? "",
+    setDesigner: (r.set_designer as string) ?? "",
+    composer: (r.composer as string) ?? "",
+    choreographer: (r.choreographer as string) ?? "",
+    performers: (r.performers as string) ?? "",
+    creditsExtra: pick(r, "credits_extra", locale),
     shortDescription: pick(r, "short_description", locale),
     fullDescription: pickField<unknown[]>(r, "full_description", locale),
     coverUrl: urlForImage(r.cover_image as never)?.width(1600).url() ?? null,
