@@ -240,7 +240,9 @@ export async function getPerformance(
     creditsExtra: pick(r, "credits_extra", locale),
     shortDescription: pick(r, "short_description", locale),
     fullDescription: pickField<unknown[]>(r, "full_description", locale),
-    coverUrl: urlForImage(r.cover_image as never)?.width(2200).quality(90).url() ?? null,
+    // Detail cover cropped to 16/7 using the author-set hotspot/crop
+    coverUrl:
+      urlForImage(r.cover_image as never)?.width(2200).height(963).fit("crop").quality(90).url() ?? null,
     gallery,
     videos: ((r.video_links as VideoLink[]) ?? []).filter((v) => v?.url),
     press,

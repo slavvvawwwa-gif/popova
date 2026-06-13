@@ -72,6 +72,8 @@ html {
   -webkit-font-smoothing: antialiased;
   /* Native smooth anchor scroll — disabled under reduced-motion below */
   scroll-behavior: smooth;
+  /* Guard against accidental horizontal scroll (full-bleed cover, etc.) */
+  overflow-x: hidden;
 }
 
 body {
