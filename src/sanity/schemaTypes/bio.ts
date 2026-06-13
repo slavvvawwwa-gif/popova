@@ -72,7 +72,7 @@ export const bio = defineType({
     }),
     defineField({
       name: "festivals",
-      title: "Участие в фестивалях, проектах, лабораториях",
+      title: "Участие в других фестивалях, проектах, лабораториях",
       type: "array",
       of: [periodEntry()],
     }),
