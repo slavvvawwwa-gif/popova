@@ -51,9 +51,15 @@ export const performance = defineType({
     }),
     defineField({
       name: "theatre",
-      title: "Локация",
+      title: "Локация (RU)",
       type: "string",
       description: "Театр / площадка / место.",
+    }),
+    defineField({
+      name: "theatre_en",
+      title: "Локация (EN)",
+      type: "string",
+      description: "Если пусто — на EN-версии используется RU.",
     }),
     defineField({
       name: "year",
@@ -100,10 +106,17 @@ export const performance = defineType({
     }),
     defineField({
       name: "tags",
-      title: "Жанр / теги",
+      title: "Жанр / теги (RU)",
       type: "array",
       of: [defineArrayMember({ type: "string" })],
       options: { layout: "tags" },
+      description: "Первый тег показывается как жанр.",
+    }),
+    defineField({
+      name: "genre_en",
+      title: "Жанр (EN)",
+      type: "string",
+      description: "Если пусто — на EN-версии используется первый тег.",
     }),
     defineField({
       name: "status",

@@ -185,7 +185,9 @@ export default function WorkDetailView({
             <PortableText value={work.fullDescription as PortableTextBlock[]} components={ptComponents} />
           ) : (
             <p className="body" style={{ lineHeight: 1.9 }}>
-              Полное описание спектакля будет доступно после подключения контента через Sanity CMS.
+              {locale === "en"
+                ? "A full description will appear here once added in the CMS."
+                : "Полное описание появится здесь после наполнения через CMS."}
             </p>
           )}
         </section>
@@ -326,7 +328,7 @@ export default function WorkDetailView({
                   </div>
                   {item.link && (
                     <a href={item.link} target="_blank" rel="noopener noreferrer" className="u-link" style={{ fontSize: "0.6rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-secondary)", textDecoration: "none", whiteSpace: "nowrap" }}>
-                      Читать ↗
+                      {locale === "en" ? "Read ↗" : "Читать ↗"}
                     </a>
                   )}
                 </div>

@@ -29,9 +29,22 @@ export const bio = defineType({
     }),
     defineField({
       name: "photo",
-      title: "Фотография",
+      title: "Главное фото (верх стопки)",
       type: "image",
       options: { hotspot: true },
+    }),
+    defineField({
+      name: "gallery",
+      title: "Галерея фотографий",
+      type: "array",
+      of: [
+        defineArrayMember({
+          type: "image",
+          options: { hotspot: true },
+          fields: [defineField({ name: "alt", title: "Alt-текст", type: "string" })],
+        }),
+      ],
+      description: "Открывается из «стопки» при нажатии на главное фото.",
     }),
     defineField({
       name: "bio_text_ru",

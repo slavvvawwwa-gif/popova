@@ -39,6 +39,7 @@ export interface WorkCard {
   status: "current" | "archive";
   featured?: boolean;
   kind: Kind;
+  shortDescription: string;
   coverUrl: string | null;
   previewUrl: string | null;
 }
@@ -101,6 +102,7 @@ export interface BioData {
   name: string;
   role: string;
   photoUrl: string | null;
+  gallery: { url: string | null; alt: string }[];
   text: unknown[] | null;
   timeline: { year: string; description: string }[];
   cvRu: string | null;
@@ -126,17 +128,28 @@ const yearOf = (d?: string | null) =>
 // revalidate is a fallback if the webhook isn't configured.
 const cache = (tags: string[]) => ({ next: { revalidate: 60, tags } });
 
+// Localize a plain RU field that has an optional `<base>_en` companion
+// (RU value lives in `<base>`, not `<base>_ru`).
+const enOr = (r: Record<string, unknown>, base: string, locale: Locale) =>
+  (locale === "en" ? (r[`${base}_en`] as string) : "") || ((r[base] as string) ?? "");
+
+const genreOf = (r: Record<string, unknown>, locale: Locale) => {
+  const tag0 = ((r.tags as string[]) ?? [])[0] ?? "";
+  return (locale === "en" ? (r.genre_en as string) : "") || tag0;
+};
+
 // Shared mapping for catalog tiles / featured / children.
 function mapCard(r: Record<string, unknown>, locale: Locale, coverWidth = 1400): WorkCard {
   return {
     slug: (r.slug as string) ?? "",
     title: pick(r, "title", locale),
-    theatre: (r.theatre as string) ?? "",
+    theatre: enOr(r, "theatre", locale),
     year: (r.year as number) ?? null,
-    genre: ((r.tags as string[]) ?? [])[0] ?? "",
+    genre: genreOf(r, locale),
     status: (r.status as "current" | "archive") ?? "archive",
     featured: Boolean(r.featured),
     kind: (r.kind as Kind) ?? "performance",
+    shortDescription: pick(r, "short_description", locale),
     coverUrl: urlForImage(r.cover_image as never)?.width(coverWidth).quality(90).url() ?? null,
     previewUrl:
       urlForImage((r.preview_image || r.cover_image) as never)?.width(900).quality(88).url() ?? null,
@@ -205,9 +218,9 @@ export async function getPerformance(
   return {
     slug: (r.slug as string) ?? slug,
     title: pick(r, "title", locale),
-    theatre: (r.theatre as string) ?? "",
+    theatre: enOr(r, "theatre", locale),
     year: (r.year as number) ?? null,
-    genre: ((r.tags as string[]) ?? [])[0] ?? "",
+    genre: genreOf(r, locale),
     status: (r.status as "current" | "archive") ?? "archive",
     kind: (r.kind as Kind) ?? "performance",
     featured: Boolean(r.featured),
@@ -273,10 +286,15 @@ export async function getBio(locale: Locale): Promise<BioData> {
   if (!client) return fallbackBio(locale);
   const r = await client.fetch<Record<string, unknown> | null>(bioQuery, {}, cache(["bio"]));
   if (!r) return fallbackBio(locale);
+  const gallery = ((r.gallery as Record<string, unknown>[]) ?? []).map((g) => ({
+    url: urlForImage(g as never)?.width(1600).quality(90).url() ?? null,
+    alt: (g.alt as string) ?? "",
+  }));
   return {
     name: pick(r, "name", locale),
     role: pick(r, "role", locale),
     photoUrl: urlForImage(r.photo as never)?.width(1100).quality(90).url() ?? null,
+    gallery,
     text: pickField<unknown[]>(r, "bio_text", locale),
     timeline: ((r.timeline as Record<string, unknown>[]) ?? []).map((tl) => ({
       year: (tl.year as string) ?? "",

@@ -60,6 +60,11 @@ export function fallbackWorks(locale: Locale, kind: Kind = "performance"): WorkC
     status: w.status,
     featured: w.featured,
     kind: w.kind,
+    shortDescription: t(
+      locale,
+      "Краткое описание появится здесь после наполнения через Sanity.",
+      "A short description will appear here once added via Sanity."
+    ),
     coverUrl: null,
     previewUrl: null,
   }));
@@ -192,6 +197,10 @@ export function fallbackBio(locale: Locale): BioData {
     name: t(locale, "Имя Фамилия", "First Last"),
     role: t(locale, "Театральный режиссёр", "Theatre Director"),
     photoUrl: null,
+    gallery: Array.from({ length: 4 }, (_, i) => ({
+      url: null,
+      alt: t(locale, `Фото ${i + 1}`, `Photo ${i + 1}`),
+    })),
     text: null,
     timeline: [
       { year: "2024", description: t(locale, "Постановка «Гамлет» в Театре А. Участие в фестивале «Золотая маска».", "Production of Hamlet at Theatre A. Golden Mask festival.") },

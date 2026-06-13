@@ -11,7 +11,7 @@ export const homeQuery = /* groq */ `
 // Shared card projection (catalog tiles / children / featured)
 const CARD = /* groq */ `
   "slug": slug.current,
-  title_ru, title_en, theatre, year, kind, role, tags, status, featured,
+  title_ru, title_en, theatre, theatre_en, year, kind, role, tags, genre_en, status, featured,
   short_description_ru, short_description_en,
   cover_image, preview_image
 `;
@@ -31,7 +31,7 @@ export const featuredPerformancesQuery = /* groq */ `
 export const performanceBySlugQuery = /* groq */ `
 *[_type == "performance" && slug.current == $slug][0] {
   "slug": slug.current,
-  title_ru, title_en, theatre, year, kind, premiere, role, tags, status,
+  title_ru, title_en, theatre, theatre_en, year, kind, premiere, role, tags, genre_en, status,
   playwright, artist, lighting_designer, set_designer, composer, choreographer, performers,
   credits_extra_ru, credits_extra_en,
   short_description_ru, short_description_en,
@@ -67,6 +67,7 @@ export const pressQuery = /* groq */ `
 export const bioQuery = /* groq */ `
 *[_type == "bio"][0] {
   name_ru, name_en, role_ru, role_en, photo,
+  gallery[]{ asset, alt },
   bio_text_ru, bio_text_en,
   timeline[]{ year, description_ru, description_en },
   "cv_ru": cv_file_ru.asset->url,

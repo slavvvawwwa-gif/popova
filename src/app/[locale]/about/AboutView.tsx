@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useReveal, revealStyle } from "@/components/useReveal";
-import LazyImage from "@/components/LazyImage";
+import PhotoStack from "@/components/PhotoStack";
 import SectionHead from "@/components/SectionHead";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import type { BioData } from "@/sanity/lib/data";
@@ -45,12 +45,10 @@ export default function AboutView({ bio }: { bio: BioData }) {
       >
         {/* Photo column */}
         <div className="about-photo-col">
-          <LazyImage
-            src={bio.photoUrl ?? undefined}
-            alt="Портрет режиссёра"
-            placeholderLabel="ИФ"
-            aspectRatio="3/4"
-            style={{ maxWidth: "380px" }}
+          <PhotoStack
+            main={{ url: bio.photoUrl, alt: bio.name || "Портрет" }}
+            photos={bio.gallery}
+            label={bio.name || "Галерея"}
           />
 
           <div style={{ marginTop: "2rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>

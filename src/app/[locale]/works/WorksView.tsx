@@ -4,14 +4,9 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useReveal, revealStyle } from "@/components/useReveal";
 import { useCursorPreview } from "@/components/CursorPreview";
-import LazyImage from "@/components/LazyImage";
 import { smoothScrollTo } from "@/lib/smoothScroll";
 import { useState } from "react";
 import type { WorkCard } from "@/sanity/lib/data";
-
-// Varied aspect ratios — combined with alternating 7/5 column widths this
-// keeps the bento visually heterogeneous (no repeated identical card).
-const BENTO_ASPECTS = ["3/2", "4/5", "16/9", "1/1", "5/4", "3/4"];
 
 function FilterButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -102,18 +97,12 @@ export default function WorksView({
             {t("current")}
           </p>
 
-          {/* Asymmetric bento: alternating 7/5 column widths + varied aspect.
-              Last lone card spans full width. First card bleeds into the
-              left gutter (grid-break, QUALITY_DIRECTIVES §4 item 1). */}
-          <div className="works-bento" style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: "2px" }}>
-            {current.map((work, i) => {
-              const pair = Math.floor(i / 2);
-              const pos = i % 2;
-              const lone = i === current.length - 1 && current.length % 2 === 1;
-              const colSpan = lone ? 12 : pair % 2 === 0 ? (pos === 0 ? 7 : 5) : pos === 0 ? 5 : 7;
-              const aspect = BENTO_ASPECTS[i % BENTO_ASPECTS.length];
-              return <GridCard key={work.slug} work={work} index={i} colSpan={colSpan} aspect={aspect} bleed={i === 0} basePath={basePath} />;
-            })}
+          {/* Masonry "wall": covers at natural aspect (no crop) packed with
+              minimal gaps; items without a cover become text tiles. */}
+          <div className="works-wall">
+            {current.map((work, i) => (
+              <GridCard key={work.slug} work={work} index={i} basePath={basePath} />
+            ))}
           </div>
         </section>
       )}
@@ -137,7 +126,7 @@ export default function WorksView({
                 marginBottom: "0.25rem",
               }}
             >
-              {["—", t("title"), "Театр", t("filter_year")].map((h) => (
+              {["—", t("title"), t("theatre"), t("filter_year")].map((h) => (
                 <span key={h} style={{ fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(237,237,237,0.2)" }}>
                   {h}
                 </span>
@@ -158,16 +147,14 @@ export default function WorksView({
       )}
 
       <style>{`
+        .works-wall { column-count: 3; column-gap: 2px; }
+        .works-wall > * { break-inside: avoid; margin-bottom: 2px; display: block; width: 100%; }
+        @media (max-width: 1023px) { .works-wall { column-count: 2; } }
+        @media (max-width: 599px) { .works-wall { column-count: 1; } }
         @media (max-width: 767px) {
-          .works-bento { grid-template-columns: 1fr !important; }
-          .works-bento > .bento-item { grid-column: 1 / -1 !important; margin-left: 0 !important; }
           .archive-row { grid-template-columns: 50px 1fr !important; }
           .archive-row span:nth-child(3),
           .archive-row span:nth-child(4) { display: none; }
-        }
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .works-bento { grid-template-columns: repeat(2, 1fr) !important; }
-          .works-bento > .bento-item { grid-column: auto !important; margin-left: 0 !important; }
         }
       `}</style>
     </div>
@@ -177,121 +164,117 @@ export default function WorksView({
 function GridCard({
   work,
   index,
-  colSpan,
-  aspect,
-  bleed,
   basePath,
 }: {
   work: WorkCard;
   index: number;
-  colSpan: number;
-  aspect: string;
-  bleed: boolean;
   basePath: string;
 }) {
   const [hovered, setHovered] = useState(false);
+  const hasCover = Boolean(work.coverUrl);
 
+  // Text tile (no cover): a tall serif block so the wall has no empty gaps.
+  if (!hasCover) {
+    return (
+      <Link
+        href={`${basePath}/${work.slug}`}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{ textDecoration: "none", display: "block", cursor: "pointer" }}
+      >
+        <article
+          style={{
+            backgroundColor: "var(--bg-surface)",
+            padding: "var(--space-8) var(--space-6)",
+            minHeight: "clamp(220px, 34vw, 340px)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            position: "relative",
+            overflow: "hidden",
+            borderLeft: hovered ? "2px solid var(--accent)" : "2px solid transparent",
+            transition: "border-color 250ms var(--ease-out-soft)",
+          }}
+        >
+          <span aria-hidden="true" style={{ position: "absolute", top: "var(--space-4)", right: "var(--space-4)", fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-secondary)" }}>
+            {work.year}
+          </span>
+          <p style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
+            {work.theatre}
+          </p>
+          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(1.5rem, 3vw, 2.4rem)", fontWeight: 300, lineHeight: 1.05, color: "var(--text-primary)", marginBottom: "0.75rem" }}>
+            {work.title}
+          </h2>
+          {work.shortDescription && (
+            <p className="body" style={{ fontSize: "0.85rem", lineHeight: 1.6, marginBottom: "0.75rem" }}>
+              {work.shortDescription}
+            </p>
+          )}
+          {work.genre && (
+            <span style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: hovered ? "var(--accent)" : "var(--text-secondary)", transition: "color 250ms var(--ease-out-soft)" }}>
+              {work.genre}
+            </span>
+          )}
+        </article>
+      </Link>
+    );
+  }
+
+  // Cover tile: image at its natural aspect (no crop) + title overlay.
   return (
     <Link
       href={`${basePath}/${work.slug}`}
-      className="bento-item"
-      style={{
-        textDecoration: "none",
-        display: "block",
-        gridColumn: `span ${colSpan}`,
-        marginLeft: bleed ? "calc(var(--space-6) * -1)" : undefined,
-      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      style={{ textDecoration: "none", display: "block", cursor: "pointer" }}
     >
-      <article
-        style={{
-          aspectRatio: aspect,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-          padding: "var(--space-6)",
-          position: "relative",
-          overflow: "hidden",
-          cursor: "pointer",
-          backgroundColor: "var(--bg-surface)",
-          borderRadius: 0,
-        }}
-      >
-        {/* Cover — scales up on hover (420ms expo) */}
-        <span
+      <article style={{ position: "relative", overflow: "hidden", backgroundColor: "var(--bg-surface)" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={work.coverUrl as string}
+          alt={work.title}
+          loading="lazy"
           style={{
-            position: "absolute",
-            inset: 0,
+            display: "block",
+            width: "100%",
+            height: "auto",
             transform: hovered ? "scale(1.04)" : "scale(1)",
-            transition: "transform 420ms var(--ease-out-expo)",
-          }}
-        >
-          <LazyImage src={work.coverUrl ?? undefined} alt={work.title} style={{ position: "absolute", inset: 0 }} />
-        </span>
-
-        {/* Scrim 0 → .35 */}
-        <span
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundColor: "rgba(10,10,10,0.35)",
-            opacity: hovered ? 1 : 0,
-            transition: "opacity 420ms var(--ease-out-expo)",
+            transition: "transform 600ms var(--ease-out-expo)",
           }}
         />
 
-        {/* Decorative index numeral — shifts up + brightens on hover */}
+        {/* Bottom scrim for legibility */}
         <span
           aria-hidden="true"
           style={{
             position: "absolute",
-            left: "var(--space-3)",
-            bottom: "var(--space-12)",
-            fontFamily: "var(--font-serif)",
-            fontSize: "clamp(3.5rem, 7vw, 6rem)",
-            fontWeight: 300,
-            lineHeight: 1,
-            color: hovered ? "rgba(237,237,237,0.09)" : "rgba(237,237,237,0.05)",
-            transform: hovered ? "translateY(-6px)" : "translateY(0)",
-            transition: "transform 400ms var(--ease-out-soft), color 400ms var(--ease-out-soft)",
-            userSelect: "none",
-            pointerEvents: "none",
-            zIndex: 1,
-          }}
-        >
-          {String(index + 1).padStart(2, "0")}
-        </span>
-
-        <span style={{ position: "absolute", top: "var(--space-4)", right: "var(--space-4)", fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-secondary)", zIndex: 2 }}>
-          {work.year}
-        </span>
-
-        {/* Single accent signal — full-height bar grows on hover */}
-        <span
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            width: "2px",
-            height: hovered ? "100%" : "0%",
-            backgroundColor: "var(--accent)",
-            transition: "height 300ms var(--ease-out-soft)",
-            zIndex: 2,
+            inset: 0,
+            background: "linear-gradient(to top, rgba(10,10,10,0.82) 0%, rgba(10,10,10,0.18) 42%, transparent 70%)",
+            opacity: hovered ? 1 : 0.9,
+            transition: "opacity 420ms var(--ease-out-expo)",
           }}
         />
 
-        <p style={{ position: "relative", zIndex: 2, fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "0.4rem" }}>
-          {work.theatre}
-        </p>
-        <h2 style={{ position: "relative", zIndex: 2, fontFamily: "var(--font-serif)", fontSize: "clamp(1.25rem, 2.4vw, 2rem)", fontWeight: 300, lineHeight: 1.05, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
-          {work.title}
-        </h2>
-        {work.genre && (
-          <span style={{ position: "relative", zIndex: 2, fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: hovered ? "var(--accent)" : "var(--text-secondary)", transition: "color 250ms var(--ease-out-soft)" }}>
-            {work.genre}
-          </span>
-        )}
+        {/* Accent bar grows on hover */}
+        <span style={{ position: "absolute", bottom: 0, left: 0, width: "2px", height: hovered ? "100%" : "0%", backgroundColor: "var(--accent)", transition: "height 300ms var(--ease-out-soft)", zIndex: 2 }} />
+
+        <span style={{ position: "absolute", top: "var(--space-4)", right: "var(--space-4)", fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-primary)", zIndex: 2 }}>
+          {work.year}
+        </span>
+
+        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "var(--space-6)", zIndex: 2 }}>
+          <p style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "0.4rem" }}>
+            {work.theatre}
+          </p>
+          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(1.25rem, 2.4vw, 2rem)", fontWeight: 300, lineHeight: 1.05, color: "var(--text-primary)", marginBottom: "0.4rem" }}>
+            {work.title}
+          </h2>
+          {work.genre && (
+            <span style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: hovered ? "var(--accent)" : "var(--text-secondary)", transition: "color 250ms var(--ease-out-soft)" }}>
+              {work.genre}
+            </span>
+          )}
+        </div>
       </article>
     </Link>
   );
