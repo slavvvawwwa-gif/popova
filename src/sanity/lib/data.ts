@@ -38,7 +38,9 @@ export interface WorkCard {
   genre: string;
   status: "current" | "archive";
   featured?: boolean;
+  kind: Kind;
   coverUrl: string | null;
+  previewUrl: string | null;
 }
 
 export interface GalleryImg {
@@ -65,6 +67,9 @@ export interface PressEntry {
 
 export interface WorkDetail extends WorkCard {
   premiere: string; // ISO date
+  children: WorkCard[];
+  parentSlug: string | null;
+  parentKind: Kind | null;
   role: string;
   playwright: string;
   artist: string;
@@ -121,6 +126,23 @@ const yearOf = (d?: string | null) =>
 // revalidate is a fallback if the webhook isn't configured.
 const cache = (tags: string[]) => ({ next: { revalidate: 60, tags } });
 
+// Shared mapping for catalog tiles / featured / children.
+function mapCard(r: Record<string, unknown>, locale: Locale, coverWidth = 1400): WorkCard {
+  return {
+    slug: (r.slug as string) ?? "",
+    title: pick(r, "title", locale),
+    theatre: (r.theatre as string) ?? "",
+    year: (r.year as number) ?? null,
+    genre: ((r.tags as string[]) ?? [])[0] ?? "",
+    status: (r.status as "current" | "archive") ?? "archive",
+    featured: Boolean(r.featured),
+    kind: (r.kind as Kind) ?? "performance",
+    coverUrl: urlForImage(r.cover_image as never)?.width(coverWidth).quality(90).url() ?? null,
+    previewUrl:
+      urlForImage((r.preview_image || r.cover_image) as never)?.width(900).quality(88).url() ?? null,
+  };
+}
+
 /* ─── Home (singleton) ───────────────────────────────────────────── */
 export async function getHome(locale: Locale): Promise<HomeContent> {
   if (!client) return fallbackHome(locale);
@@ -139,31 +161,18 @@ export async function getPerformances(locale: Locale, kind: Kind = "performance"
   if (!client) return fallbackWorks(locale, kind);
   const rows = await client.fetch<Record<string, unknown>[]>(performancesQuery, { kind }, cache(["performance"]));
   if (!rows?.length) return fallbackWorks(locale, kind);
-  return rows.map((r) => ({
-    slug: (r.slug as string) ?? "",
-    title: pick(r, "title", locale),
-    theatre: (r.theatre as string) ?? "",
-    year: (r.year as number) ?? null,
-    genre: ((r.tags as string[]) ?? [])[0] ?? "",
-    status: (r.status as "current" | "archive") ?? "archive",
-    featured: Boolean(r.featured),
-    coverUrl: urlForImage(r.cover_image as never)?.width(1400).quality(88).url() ?? null,
-  }));
+  return rows.map((r) => mapCard(r, locale));
 }
 
 export async function getFeaturedPerformances(locale: Locale): Promise<WorkCard[]> {
-  if (!client) return fallbackWorks(locale).filter((w) => w.featured).slice(0, 3);
+  const fb = () =>
+    [...fallbackWorks(locale, "performance"), ...fallbackWorks(locale, "project"), ...fallbackWorks(locale, "lab")]
+      .filter((w) => w.featured)
+      .slice(0, 3);
+  if (!client) return fb();
   const rows = await client.fetch<Record<string, unknown>[]>(featuredPerformancesQuery, {}, cache(["performance"]));
-  if (!rows?.length) return fallbackWorks(locale).filter((w) => w.featured).slice(0, 3);
-  return rows.map((r) => ({
-    slug: (r.slug as string) ?? "",
-    title: pick(r, "title", locale),
-    theatre: (r.theatre as string) ?? "",
-    year: (r.year as number) ?? null,
-    genre: ((r.tags as string[]) ?? [])[0] ?? "",
-    status: (r.status as "current" | "archive") ?? "current",
-    coverUrl: urlForImage(r.cover_image as never)?.width(1800).quality(90).url() ?? null,
-  }));
+  if (!rows?.length) return fb();
+  return rows.map((r) => mapCard(r, locale, 1800));
 }
 
 export async function getPerformance(
@@ -191,6 +200,8 @@ export async function getPerformance(
     performance: null,
   }));
 
+  const children = ((r.children as Record<string, unknown>[]) ?? []).map((c) => mapCard(c, locale));
+
   return {
     slug: (r.slug as string) ?? slug,
     title: pick(r, "title", locale),
@@ -198,6 +209,12 @@ export async function getPerformance(
     year: (r.year as number) ?? null,
     genre: ((r.tags as string[]) ?? [])[0] ?? "",
     status: (r.status as "current" | "archive") ?? "archive",
+    kind: (r.kind as Kind) ?? "performance",
+    featured: Boolean(r.featured),
+    previewUrl: urlForImage((r.preview_image || r.cover_image) as never)?.width(900).quality(88).url() ?? null,
+    parentSlug: (r.parentSlug as string) ?? null,
+    parentKind: (r.parentKind as Kind) ?? null,
+    children,
     premiere: (r.premiere as string) ?? "",
     role: (r.role as string) ?? "",
     playwright: (r.playwright as string) ?? "",

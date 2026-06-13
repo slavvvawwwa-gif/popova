@@ -8,29 +8,40 @@ export const homeQuery = /* groq */ `
   hero_tagline_ru, hero_tagline_en
 }`;
 
-export const performancesQuery = /* groq */ `
-*[_type == "performance" && kind == $kind] | order(year desc, _createdAt desc) {
+// Shared card projection (catalog tiles / children / featured)
+const CARD = /* groq */ `
   "slug": slug.current,
-  title_ru, title_en, theatre, year, role, tags, status, featured,
+  title_ru, title_en, theatre, year, kind, role, tags, status, featured,
   short_description_ru, short_description_en,
-  cover_image
+  cover_image, preview_image
+`;
+
+// Top-level catalog by kind (excludes nested sub-entities)
+export const performancesQuery = /* groq */ `
+*[_type == "performance" && kind == $kind && !defined(parent)] | order(year desc, _createdAt desc) {
+  ${CARD}
 }`;
 
+// Featured across all kinds (the "В избранное" checkbox)
 export const featuredPerformancesQuery = /* groq */ `
-*[_type == "performance" && featured == true] | order(year desc)[0...3] {
-  "slug": slug.current,
-  title_ru, title_en, theatre, year, tags, status, cover_image
+*[_type == "performance" && featured == true && !defined(parent)] | order(year desc, _createdAt desc)[0...3] {
+  ${CARD}
 }`;
 
 export const performanceBySlugQuery = /* groq */ `
 *[_type == "performance" && slug.current == $slug][0] {
   "slug": slug.current,
-  title_ru, title_en, theatre, year, premiere, role, tags, status,
+  title_ru, title_en, theatre, year, kind, premiere, role, tags, status,
   playwright, artist, lighting_designer, set_designer, composer, choreographer, performers,
   credits_extra_ru, credits_extra_en,
   short_description_ru, short_description_en,
   full_description_ru, full_description_en,
   cover_image,
+  "parentSlug": parent->slug.current,
+  "parentKind": parent->kind,
+  "children": *[_type == "performance" && parent._ref == ^._id] | order(year desc, _createdAt desc) {
+    ${CARD}
+  },
   gallery[]{ asset, alt, caption_ru, caption_en },
   video_links[]{ url, label },
   "press": *[_type == "pressItem" && references(^._id)] | order(date desc) {

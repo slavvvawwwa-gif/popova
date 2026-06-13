@@ -41,6 +41,15 @@ export const performance = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
+      name: "parent",
+      title: "Родительский проект / лаборатория",
+      type: "reference",
+      to: [{ type: "performance" }],
+      options: { filter: 'kind == "project" || kind == "lab"' },
+      description:
+        "Заполните, если это выпуск/часть проекта или лаборатории. Тогда он откроется внутри родителя.",
+    }),
+    defineField({
       name: "theatre",
       title: "Локация",
       type: "string",
@@ -145,6 +154,14 @@ export const performance = defineType({
       title: "Обложка",
       type: "image",
       options: { hotspot: true },
+      description: "Кадрирование задаётся точкой фокуса (hotspot).",
+    }),
+    defineField({
+      name: "preview_image",
+      title: "Превью при наведении (вертикальное)",
+      type: "image",
+      options: { hotspot: true },
+      description: "Показывается при наведении в архиве. Если пусто — берётся обложка.",
     }),
     defineField({
       name: "gallery",

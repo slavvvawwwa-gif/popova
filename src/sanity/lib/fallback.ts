@@ -59,7 +59,9 @@ export function fallbackWorks(locale: Locale, kind: Kind = "performance"): WorkC
     genre: t(locale, w.genreRu, w.genreEn),
     status: w.status,
     featured: w.featured,
+    kind: w.kind,
     coverUrl: null,
+    previewUrl: null,
   }));
 }
 
@@ -72,6 +74,16 @@ export function fallbackWorkDetail(slug: string, locale: Locale): WorkDetail {
     year: w.year,
     genre: t(locale, w.genreRu, w.genreEn),
     status: w.status,
+    kind: w.kind,
+    featured: w.featured,
+    previewUrl: null,
+    parentSlug: null,
+    parentKind: null,
+    // Projects/labs show their nested sub-entities (other items of same kind as demo)
+    children:
+      w.kind === "performance"
+        ? []
+        : fallbackWorks(locale, w.kind).filter((x) => x.slug !== w.slug),
     premiere: `${w.year}-09-15`,
     role: t(locale, "Варвара Попова", "Varvara Popova"),
     playwright: t(locale, "У. Шекспир", "W. Shakespeare"),

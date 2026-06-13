@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPerformance, type Locale } from "@/sanity/lib/data";
-import WorkDetailView from "./WorkDetailView";
+import WorkDetailView from "../../works/[slug]/WorkDetailView";
 
 export async function generateMetadata({
   params,
@@ -10,7 +10,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const work = await getPerformance(slug, locale as Locale);
-  if (!work) return { title: "Спектакль" };
+  if (!work) return { title: "Проект" };
   return {
     title: work.title,
     description: work.shortDescription || undefined,
@@ -22,7 +22,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function WorkPage({
+export default async function ProjectDetailPage({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
@@ -30,5 +30,5 @@ export default async function WorkPage({
   const { locale, slug } = await params;
   const work = await getPerformance(slug, locale as Locale);
   if (!work) notFound();
-  return <WorkDetailView work={work} basePath="/works" />;
+  return <WorkDetailView work={work} basePath="/projects" />;
 }

@@ -3,7 +3,16 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useRef, useState } from "react";
+import LazyImage from "@/components/LazyImage";
 import type { WorkCard as WorkCardData, HomeContent } from "@/sanity/lib/data";
+
+const SECTION_PATH: Record<string, string> = {
+  performance: "/works",
+  project: "/projects",
+  lab: "/lab",
+};
+const hrefFor = (c?: WorkCardData | null) =>
+  c ? `${SECTION_PATH[c.kind] ?? "/works"}/${c.slug}` : "/works";
 
 /* ─── Scroll-reveal hook ──────────────────────────────────────────── */
 function useReveal() {
@@ -39,6 +48,7 @@ function WorkCard({
   year,
   genre,
   index,
+  coverUrl,
   style: extraStyle,
 }: {
   href: string;
@@ -47,6 +57,7 @@ function WorkCard({
   year: string;
   genre: string;
   index: number;
+  coverUrl?: string;
   style?: React.CSSProperties;
 }) {
   const [hovered, setHovered] = useState(false);
@@ -61,37 +72,45 @@ function WorkCard({
       <article
         style={{
           height: "100%",
-          backgroundColor: hovered ? "#242424" : "var(--bg-surface)",
+          backgroundColor: "var(--bg-surface)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-end",
           padding: "2rem",
           position: "relative",
           overflow: "hidden",
-          transition: "background-color 250ms var(--ease-out-soft)",
           cursor: "pointer",
         }}
       >
-        {/* Decorative roman numeral */}
+        {/* Cover image — scales on hover */}
+        <span
+          style={{
+            position: "absolute",
+            inset: 0,
+            transform: hovered ? "scale(1.04)" : "scale(1)",
+            transition: "transform 600ms var(--ease-out-expo)",
+          }}
+        >
+          <LazyImage
+            src={coverUrl}
+            alt={typeof title === "string" ? title : ""}
+            placeholderLabel={["I", "II", "III"][index]}
+            style={{ position: "absolute", inset: 0 }}
+          />
+        </span>
+
+        {/* Scrim for text legibility (stronger on hover) */}
         <span
           aria-hidden="true"
           style={{
             position: "absolute",
-            top: "1rem",
-            left: "1.5rem",
-            fontFamily: "var(--font-serif)",
-            fontSize: "clamp(4rem, 8vw, 7rem)",
-            fontWeight: 300,
-            lineHeight: 1,
-            color: "rgba(237,237,237,0.04)",
-            userSelect: "none",
-            pointerEvents: "none",
-            transition: "color 250ms var(--ease-out-soft)",
-            ...(hovered ? { color: "rgba(237,237,237,0.07)" } : {}),
+            inset: 0,
+            background:
+              "linear-gradient(to top, rgba(10,10,10,0.78) 0%, rgba(10,10,10,0.32) 45%, rgba(10,10,10,0.12) 100%)",
+            opacity: hovered ? 1 : 0.85,
+            transition: "opacity 420ms var(--ease-out-expo)",
           }}
-        >
-          {["I", "II", "III"][index]}
-        </span>
+        />
 
         {/* Year — top right */}
         <span
@@ -99,6 +118,7 @@ function WorkCard({
             position: "absolute",
             top: "1.5rem",
             right: "1.5rem",
+            zIndex: 2,
             fontSize: "0.6rem",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
@@ -114,6 +134,7 @@ function WorkCard({
             position: "absolute",
             bottom: 0,
             left: 0,
+            zIndex: 2,
             width: "2px",
             height: hovered ? "40%" : "0%",
             backgroundColor: "var(--accent)",
@@ -123,6 +144,8 @@ function WorkCard({
 
         <p
           style={{
+            position: "relative",
+            zIndex: 2,
             fontSize: "0.6rem",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
@@ -135,6 +158,8 @@ function WorkCard({
 
         <h3
           style={{
+            position: "relative",
+            zIndex: 2,
             fontFamily: "var(--font-serif)",
             fontSize: "clamp(1.25rem, 2.2vw, 1.75rem)",
             fontWeight: 300,
@@ -148,6 +173,8 @@ function WorkCard({
 
         <span
           style={{
+            position: "relative",
+            zIndex: 2,
             fontSize: "0.6rem",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
@@ -428,32 +455,35 @@ export default function HomeView({
         >
           <div style={{ gridArea: "card-a" }}>
             <WorkCard
-              href={cards[0] ? `/works/${cards[0].slug}` : "/works"}
+              href={hrefFor(cards[0])}
               title={cards[0]?.title ?? "—"}
               theatre={cards[0]?.theatre ?? ""}
               year={cards[0]?.year ? String(cards[0].year) : ""}
               genre={cards[0]?.genre ?? ""}
+              coverUrl={cards[0]?.coverUrl ?? undefined}
               index={0}
               style={{ minHeight: "100%" }}
             />
           </div>
           <div style={{ gridArea: "card-b" }}>
             <WorkCard
-              href={cards[1] ? `/works/${cards[1].slug}` : "/works"}
+              href={hrefFor(cards[1])}
               title={cards[1]?.title ?? "—"}
               theatre={cards[1]?.theatre ?? ""}
               year={cards[1]?.year ? String(cards[1].year) : ""}
               genre={cards[1]?.genre ?? ""}
+              coverUrl={cards[1]?.coverUrl ?? undefined}
               index={1}
             />
           </div>
           <div style={{ gridArea: "card-c" }}>
             <WorkCard
-              href={cards[2] ? `/works/${cards[2].slug}` : "/works"}
+              href={hrefFor(cards[2])}
               title={cards[2]?.title ?? "—"}
               theatre={cards[2]?.theatre ?? ""}
               year={cards[2]?.year ? String(cards[2].year) : ""}
               genre={cards[2]?.genre ?? ""}
+              coverUrl={cards[2]?.coverUrl ?? undefined}
               index={2}
               style={{ backgroundColor: "#141414" }}
             />

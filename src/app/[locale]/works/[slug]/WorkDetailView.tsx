@@ -53,10 +53,19 @@ function fmtPremiere(iso: string, locale: "ru" | "en") {
   });
 }
 
-export default function WorkDetailView({ work }: { work: WorkDetail }) {
+export default function WorkDetailView({
+  work,
+  basePath = "/works",
+}: {
+  work: WorkDetail;
+  basePath?: string;
+}) {
   const t = useTranslations("work");
   const tc = useTranslations("common");
   const locale = useLocale() as "ru" | "en";
+
+  // Back goes to the parent (if this is a sub-entity) or the section list.
+  const backHref = work.parentSlug ? `${basePath}/${work.parentSlug}` : basePath;
 
   const headerReveal = useReveal();
   const descReveal = useReveal(80);
@@ -90,7 +99,7 @@ export default function WorkDetailView({ work }: { work: WorkDetail }) {
 
       <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "5rem 2rem 6rem" }}>
         <Link
-          href="/works"
+          href={backHref}
           className="u-link"
           style={{
             display: "inline-flex",
@@ -148,7 +157,6 @@ export default function WorkDetailView({ work }: { work: WorkDetail }) {
               { label: t("composer"), value: work.composer },
               { label: t("choreographer"), value: work.choreographer },
               { label: t("performers"), value: work.performers },
-              { label: t("extra"), value: work.creditsExtra },
             ]
               .filter((r) => r.value)
               .map((row) => (
@@ -160,17 +168,19 @@ export default function WorkDetailView({ work }: { work: WorkDetail }) {
           </div>
         </header>
 
-        {/* Cover */}
-        <LazyImage
-          src={work.coverUrl ?? undefined}
-          alt={`${work.title} — обложка`}
-          placeholderLabel={work.title}
-          aspectRatio="16/7"
-          style={{ width: "100%", marginBottom: "4rem" }}
-        />
+        {/* Cover — full viewport width (breaks out of the 1440 container) */}
+        <div style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", marginBottom: "4rem" }}>
+          <LazyImage
+            src={work.coverUrl ?? undefined}
+            alt={`${work.title} — обложка`}
+            placeholderLabel={work.title}
+            aspectRatio="16/7"
+            style={{ width: "100%" }}
+          />
+        </div>
 
         {/* Full description — justified, accent drop cap on first letter */}
-        <section ref={descReveal.ref} className="work-desc" style={{ ...revealStyle(descReveal.visible), maxWidth: "720px", marginBottom: "5rem" }}>
+        <section ref={descReveal.ref} className="work-desc" style={{ ...revealStyle(descReveal.visible), maxWidth: "720px", marginBottom: work.creditsExtra ? "2.5rem" : "5rem" }}>
           {work.fullDescription ? (
             <PortableText value={work.fullDescription as PortableTextBlock[]} components={ptComponents} />
           ) : (
@@ -179,6 +189,59 @@ export default function WorkDetailView({ work }: { work: WorkDetail }) {
             </p>
           )}
         </section>
+
+        {/* "Дополнительно" — optional freeform block, justified (#10) */}
+        {work.creditsExtra && (
+          <section style={{ maxWidth: "720px", marginBottom: "5rem" }}>
+            <p style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "1rem" }}>
+              {t("extra")}
+            </p>
+            <p
+              className="body"
+              style={{ textAlign: "justify", textJustify: "inter-word", hyphens: "auto", whiteSpace: "pre-line" }}
+            >
+              {work.creditsExtra}
+            </p>
+          </section>
+        )}
+
+        {/* Sub-entities (releases) for projects / labs */}
+        {work.children.length > 0 && (
+          <section style={{ marginBottom: "5rem" }}>
+            <p style={{ fontSize: "0.6rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "2rem" }}>
+              {t("releases")}
+            </p>
+            <div>
+              {work.children.map((c, i) => (
+                <Link
+                  key={c.slug}
+                  href={`${basePath}/${c.slug}`}
+                  className="child-row"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "72px 1fr auto",
+                    gap: "1.5rem",
+                    alignItems: "baseline",
+                    padding: "1.25rem 0",
+                    borderTop: i === 0 ? "1px solid rgba(237,237,237,0.1)" : "none",
+                    borderBottom: "1px solid rgba(237,237,237,0.05)",
+                    textDecoration: "none",
+                  }}
+                >
+                  <span style={{ fontFamily: "var(--font-serif)", fontSize: "0.95rem", color: "var(--text-secondary)" }}>
+                    {c.year ?? ""}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(1.05rem, 1.8vw, 1.4rem)", fontWeight: 300, color: "var(--text-primary)" }}>
+                    {c.title}
+                  </span>
+                  <span style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-secondary)", textAlign: "right" }}>
+                    {c.genre}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Gallery */}
         {lbImages.length > 0 && (

@@ -44,6 +44,7 @@ export default function WorksView({
   section?: "works" | "projects" | "lab";
 }) {
   const t = useTranslations(section);
+  const basePath = `/${section}`;
   const headerReveal = useReveal();
   const listReveal = useReveal(100);
 
@@ -111,7 +112,7 @@ export default function WorksView({
               const lone = i === current.length - 1 && current.length % 2 === 1;
               const colSpan = lone ? 12 : pair % 2 === 0 ? (pos === 0 ? 7 : 5) : pos === 0 ? 5 : 7;
               const aspect = BENTO_ASPECTS[i % BENTO_ASPECTS.length];
-              return <GridCard key={work.slug} work={work} index={i} colSpan={colSpan} aspect={aspect} bleed={i === 0} />;
+              return <GridCard key={work.slug} work={work} index={i} colSpan={colSpan} aspect={aspect} bleed={i === 0} basePath={basePath} />;
             })}
           </div>
         </section>
@@ -144,7 +145,7 @@ export default function WorksView({
             </div>
 
             {archive.map((work, i) => (
-              <ArchiveRow key={work.slug} work={work} index={i} />
+              <ArchiveRow key={work.slug} work={work} index={i} basePath={basePath} />
             ))}
           </div>
         </section>
@@ -179,18 +180,20 @@ function GridCard({
   colSpan,
   aspect,
   bleed,
+  basePath,
 }: {
   work: WorkCard;
   index: number;
   colSpan: number;
   aspect: string;
   bleed: boolean;
+  basePath: string;
 }) {
   const [hovered, setHovered] = useState(false);
 
   return (
     <Link
-      href={`/works/${work.slug}`}
+      href={`${basePath}/${work.slug}`}
       className="bento-item"
       style={{
         textDecoration: "none",
@@ -294,18 +297,19 @@ function GridCard({
   );
 }
 
-function ArchiveRow({ work, index }: { work: WorkCard; index: number }) {
+function ArchiveRow({ work, index, basePath }: { work: WorkCard; index: number; basePath: string }) {
   const [hovered, setHovered] = useState(false);
   const preview = useCursorPreview();
   const isStatic = preview.mode === "static";
 
   return (
     <Link
-      href={`/works/${work.slug}`}
+      href={`${basePath}/${work.slug}`}
       style={{ textDecoration: "none", display: "block" }}
       onMouseEnter={() => {
         setHovered(true);
-        preview.show({ label: work.title, src: work.coverUrl ?? undefined });
+        // #3: hover uses the dedicated vertical preview image (falls back to cover)
+        preview.show({ label: work.title, src: work.previewUrl ?? work.coverUrl ?? undefined });
       }}
       onMouseLeave={() => {
         setHovered(false);
