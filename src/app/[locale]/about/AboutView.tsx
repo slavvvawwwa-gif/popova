@@ -93,6 +93,7 @@ export default function AboutView({ bio }: { bio: BioData }) {
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
               marginBottom: "3rem",
+              overflowWrap: "break-word",
             }}
           >
             {firstName}
@@ -137,7 +138,7 @@ export default function AboutView({ bio }: { bio: BioData }) {
 
       <style>{`
         @media (min-width: 768px) {
-          .about-grid { grid-template-columns: 320px 1fr !important; }
+          .about-grid { grid-template-columns: 320px minmax(0, 1fr) !important; }
         }
       `}</style>
     </div>
@@ -154,7 +155,7 @@ function PeriodBlock({ title, entries }: { title: string; entries: PeriodEntry[]
           key={e.period + i}
           style={{
             display: "grid",
-            gridTemplateColumns: "120px 1fr",
+            gridTemplateColumns: "120px minmax(0, 1fr)",
             gap: "1.5rem",
             alignItems: "baseline",
             padding: "1.25rem 0",
