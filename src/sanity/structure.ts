@@ -17,6 +17,10 @@ export const structure: StructureResolver = (S) =>
         .title("Контакты")
         .id("contacts")
         .child(S.document().schemaType("contacts").documentId("contacts")),
+      S.listItem()
+        .title("Настройки сайта")
+        .id("siteSettings")
+        .child(S.document().schemaType("siteSettings").documentId("siteSettings")),
       S.divider(),
       // One document type (performance) split by `kind` into three catalogs.
       // Each list's create button uses the matching template so a new doc gets

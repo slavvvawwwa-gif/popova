@@ -11,6 +11,34 @@ import { spanFor } from "@/lib/bento";
 import { useState } from "react";
 import type { WorkCard } from "@/sanity/lib/data";
 
+const YEAR_WINDOW = 5;
+
+function YearArrow({ dir, disabled, onClick }: { dir: "left" | "right"; disabled: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      aria-label={dir === "left" ? "Более новые годы" : "Более ранние годы"}
+      style={{
+        background: "none",
+        border: "none",
+        padding: "0.25rem 0.15rem",
+        cursor: disabled ? "default" : "pointer",
+        color: disabled ? "rgba(237,237,237,0.16)" : "var(--text-secondary)",
+        display: "inline-flex",
+        alignItems: "center",
+        transition: "color 200ms var(--ease-out-soft)",
+      }}
+      onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.color = "var(--accent)"; }}
+      onMouseLeave={(e) => { if (!disabled) e.currentTarget.style.color = "var(--text-secondary)"; }}
+    >
+      <svg width="8" height="13" viewBox="0 0 8 13" fill="none" aria-hidden="true" style={{ transform: dir === "left" ? "rotate(180deg)" : "none" }}>
+        <path d="M1 1L6.5 6.5L1 12" stroke="currentColor" strokeWidth="1.3" />
+      </svg>
+    </button>
+  );
+}
+
 function FilterButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
@@ -47,8 +75,13 @@ export default function WorksView({
   const listReveal = useReveal(100);
 
   const [activeYear, setActiveYear] = useState<number | null>(null);
+  const [yearPage, setYearPage] = useState(0); // window of years, 0 = most recent 5
 
   const years = [...new Set(works.map((w) => w.year).filter((y): y is number => y !== null))].sort((a, b) => b - a);
+  // Show 5 years at a time (newest first); arrows page to older / newer fives.
+  const visibleYears = years.slice(yearPage * YEAR_WINDOW, yearPage * YEAR_WINDOW + YEAR_WINDOW);
+  const hasOlder = (yearPage + 1) * YEAR_WINDOW < years.length;
+  const hasNewer = yearPage > 0;
 
   const selectYear = (year: number | null) => {
     setActiveYear(year);
@@ -80,15 +113,24 @@ export default function WorksView({
           {t("title")}
         </p>
 
-        <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", alignItems: "baseline" }}>
+        <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
           <FilterButton active={activeYear === null} onClick={() => selectYear(null)}>
             {t("filter_all")}
           </FilterButton>
-          {years.map((year) => (
+
+          {years.length > YEAR_WINDOW && (
+            <YearArrow dir="left" disabled={!hasNewer} onClick={() => setYearPage((p) => Math.max(0, p - 1))} />
+          )}
+
+          {visibleYears.map((year) => (
             <FilterButton key={year} active={activeYear === year} onClick={() => selectYear(year)}>
               {year}
             </FilterButton>
           ))}
+
+          {years.length > YEAR_WINDOW && (
+            <YearArrow dir="right" disabled={!hasOlder} onClick={() => setYearPage((p) => (hasOlder ? p + 1 : p))} />
+          )}
         </div>
       </header>
 

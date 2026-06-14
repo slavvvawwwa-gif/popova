@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import Navigation from "@/components/Navigation";
 import { CursorPreviewProvider } from "@/components/CursorPreview";
 import BackToTop from "@/components/BackToTop";
+import { getSiteSettings } from "@/sanity/lib/data";
 import { SITE_URL } from "@/lib/seo";
 import "../globals.css";
 
@@ -49,6 +50,7 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) notFound();
 
   const messages = await getMessages();
+  const settings = await getSiteSettings();
 
   const en = locale === "en";
   const jsonLd = {
@@ -61,30 +63,56 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className="h-full">
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <NextIntlClientProvider messages={messages}>
-          <CursorPreviewProvider>
-            <Navigation locale={locale} />
-            <BackToTop />
-            <main className="flex-1">{children}</main>
-            <footer
+
+        {/* Decorative background overlay — fixed to the right half of the
+            viewport on every device, never crossing the centre, static on
+            scroll. Sits above the black background but behind all content. */}
+        {settings.backgroundUrl && (
+          <div
+            aria-hidden="true"
             style={{
-              borderTop: "1px solid rgba(237,237,237,0.08)",
-              padding: "2rem 0",
-              textAlign: "center",
-              color: "var(--text-secondary)",
-              fontSize: "0.75rem",
-              letterSpacing: "0.1em",
+              position: "fixed",
+              top: 0,
+              right: 0,
+              width: "50vw",
+              height: "100dvh",
+              backgroundImage: `url(${settings.backgroundUrl})`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+              backgroundSize: "contain",
+              opacity: settings.backgroundOpacity,
+              pointerEvents: "none",
+              zIndex: 0,
             }}
-          >
-              © {new Date().getFullYear()}
-            </footer>
-          </CursorPreviewProvider>
-        </NextIntlClientProvider>
+          />
+        )}
+
+        <div style={{ position: "relative", zIndex: 1, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
+          <NextIntlClientProvider messages={messages}>
+            <CursorPreviewProvider>
+              <Navigation locale={locale} />
+              <BackToTop />
+              <main className="flex-1">{children}</main>
+              <footer
+                style={{
+                  borderTop: "1px solid rgba(237,237,237,0.08)",
+                  padding: "2rem 0",
+                  textAlign: "center",
+                  color: "var(--text-secondary)",
+                  fontSize: "0.75rem",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                © {new Date().getFullYear()}
+              </footer>
+            </CursorPreviewProvider>
+          </NextIntlClientProvider>
+        </div>
       </body>
     </html>
   );

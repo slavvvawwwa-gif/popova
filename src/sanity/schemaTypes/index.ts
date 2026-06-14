@@ -6,7 +6,8 @@ import { playbillEntry } from "./playbillEntry";
 import { pressItem } from "./pressItem";
 import { bio } from "./bio";
 import { contacts } from "./contacts";
+import { siteSettings } from "./siteSettings";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [home, performance, playbillEntry, pressItem, bio, contacts],
+  types: [home, performance, playbillEntry, pressItem, bio, contacts, siteSettings],
 };

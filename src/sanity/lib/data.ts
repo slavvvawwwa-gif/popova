@@ -16,6 +16,7 @@ import {
   pressQuery,
   bioQuery,
   contactsQuery,
+  siteSettingsQuery,
 } from "./queries";
 import {
   fallbackHome,
@@ -359,6 +360,24 @@ export async function getAllPaths(): Promise<{ section: string; slug: string }[]
   return (rows ?? [])
     .filter((r) => r.slug)
     .map((r) => ({ section: SECTION_BY_KIND[r.kind] ?? "works", slug: r.slug }));
+}
+
+/* ─── Site settings (singleton) ──────────────────────────────────── */
+export interface SiteSettings {
+  backgroundUrl: string | null;
+  backgroundOpacity: number; // 0..1
+}
+
+export async function getSiteSettings(): Promise<SiteSettings> {
+  const fallback: SiteSettings = { backgroundUrl: null, backgroundOpacity: 1 };
+  if (!client) return fallback;
+  const r = await client.fetch<Record<string, unknown> | null>(siteSettingsQuery, {}, cache(["siteSettings"]));
+  if (!r) return fallback;
+  const pct = typeof r.background_opacity === "number" ? r.background_opacity : 100;
+  return {
+    backgroundUrl: (r.background_url as string) ?? null,
+    backgroundOpacity: Math.max(0, Math.min(1, pct / 100)),
+  };
 }
 
 /* ─── Contacts (singleton) ───────────────────────────────────────── */

@@ -87,3 +87,9 @@ export const contactsQuery = /* groq */ `
   email,
   social_links[]{ platform, url, handle }
 }`;
+
+export const siteSettingsQuery = /* groq */ `
+*[_type == "siteSettings"][0] {
+  "background_url": background_svg.asset->url,
+  background_opacity
+}`;
