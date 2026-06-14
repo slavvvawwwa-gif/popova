@@ -40,7 +40,7 @@ export default function AboutView({ bio }: { bio: BioData }) {
 
       <div
         ref={bioReveal.ref}
-        style={{ ...revealStyle(bioReveal.visible, 80), display: "grid", gridTemplateColumns: "1fr", gap: "4rem" }}
+        style={{ ...revealStyle(bioReveal.visible, 80), display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: "4rem" }}
         className="about-grid"
       >
         {/* Photo column */}
