@@ -80,6 +80,9 @@ body {
   min-height: 100dvh;
   background-color: var(--bg-primary);
   font-family: var(--font-sans);
+  /* Belt-and-suspenders against horizontal overflow → no mobile auto-zoom */
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* ─── Navigation responsive (explicit, not Tailwind-dependent) ───── */
@@ -106,8 +109,15 @@ body {
 }
 @media (max-width: 1023px) { .bento-grid { grid-auto-rows: clamp(120px, 22vw, 200px); } }
 @media (max-width: 599px) {
-  .bento-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 42vw; }
-  .bento-grid > .bento-item { grid-column: span 2 !important; grid-row: span 1 !important; }
+  /* One full-bleed cover per row (edge to edge): cancel the page's 2rem
+     side padding so covers span the whole screen width. */
+  .bento-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: 64vw;
+    margin-left: -2rem;
+    margin-right: -2rem;
+  }
+  .bento-grid > .bento-item { grid-column: 1 / -1 !important; grid-row: span 1 !important; }
 }
 
 /* ─── Typography primitives (systematized — Refactoring UI) ──────── */

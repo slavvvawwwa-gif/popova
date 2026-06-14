@@ -156,8 +156,8 @@ export default function WorkDetailView({
           </div>
         </header>
 
-        {/* Cover — full viewport width (breaks out of the 1440 container) */}
-        <div style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", marginBottom: "4rem" }}>
+        {/* Cover — full viewport width (overflow-safe full-bleed, no 100vw) */}
+        <div style={{ marginLeft: "calc(50% - 50vw)", marginRight: "calc(50% - 50vw)", marginBottom: "4rem" }}>
           <LazyImage
             src={work.coverUrl ?? undefined}
             alt={`${work.title} — обложка`}
