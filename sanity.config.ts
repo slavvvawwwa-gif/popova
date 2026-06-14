@@ -5,6 +5,7 @@ import { visionTool } from "@sanity/vision";
 import { studioProjectId, dataset, apiVersion } from "./src/sanity/env";
 import { schema } from "./src/sanity/schemaTypes";
 import { structure } from "./src/sanity/structure";
+import { deleteWithContent } from "./src/sanity/actions/deleteWithContent";
 
 // Configuration for the embedded Studio mounted at /studio.
 export default defineConfig({
@@ -21,6 +22,11 @@ export default defineConfig({
       { id: "new-project", title: "Проект", schemaType: "performance", value: { kind: "project" } },
       { id: "new-lab", title: "Лаборатория", schemaType: "performance", value: { kind: "lab" } },
     ],
+  },
+  document: {
+    // Add a cascade-delete action to performances (спектакли/проекты/лаборатории)
+    actions: (prev, { schemaType }) =>
+      schemaType === "performance" ? [...prev, deleteWithContent] : prev,
   },
   plugins: [
     structureTool({ structure }),

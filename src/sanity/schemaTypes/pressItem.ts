@@ -65,6 +65,7 @@ export const pressItem = defineType({
       title: "Связанный спектакль",
       type: "reference",
       to: [{ type: "performance" }],
+      weak: true,
       description: "Опционально.",
     }),
   ],

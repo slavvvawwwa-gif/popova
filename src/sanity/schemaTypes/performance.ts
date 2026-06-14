@@ -45,6 +45,7 @@ export const performance = defineType({
       title: "Родительский проект / лаборатория",
       type: "reference",
       to: [{ type: "performance" }],
+      weak: true,
       options: { filter: 'kind == "project" || kind == "lab"' },
       description:
         "Заполните, если это выпуск/часть проекта или лаборатории. Тогда он откроется внутри родителя.",
