@@ -85,6 +85,40 @@ body {
   max-width: 100%;
 }
 
+/* ─── Decorative background vector (masked → always white) ───────── */
+/* The vector is a CSS mask filled with solid white; --bg-vec carries the url.
+   Centred on the right screen edge: width 100vw → its left half (50vw) fills
+   the right half of the screen, right half clipped off-screen. */
+.bg-vector {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-color: #ffffff;
+  -webkit-mask-image: var(--bg-vec);
+  mask-image: var(--bg-vec);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 50vw center;
+  mask-position: 50vw center;
+  -webkit-mask-size: 100vw auto;
+  mask-size: 100vw auto;
+}
+/* Mobile (portrait, taller than wide): stack two copies vertically so the
+   right edge feels more filled. */
+@media (max-width: 767px) {
+  .bg-vector {
+    -webkit-mask-image: var(--bg-vec), var(--bg-vec);
+    mask-image: var(--bg-vec), var(--bg-vec);
+    -webkit-mask-repeat: no-repeat, no-repeat;
+    mask-repeat: no-repeat, no-repeat;
+    -webkit-mask-position: 50vw 25%, 50vw 75%;
+    mask-position: 50vw 25%, 50vw 75%;
+    -webkit-mask-size: 100vw auto, 100vw auto;
+    mask-size: 100vw auto, 100vw auto;
+  }
+}
+
 /* ─── Navigation responsive (explicit, not Tailwind-dependent) ───── */
 .nav-desktop { display: none; align-items: center; gap: 2.5rem; }
 .nav-burger { display: inline-flex; }

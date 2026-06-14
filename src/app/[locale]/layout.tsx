@@ -79,24 +79,11 @@ export default async function LocaleLayout({
         {settings.backgroundUrl && (
           <div
             aria-hidden="true"
+            className="bg-vector"
             style={{
-              position: "fixed",
-              inset: 0,
-              pointerEvents: "none",
-              zIndex: 0,
               opacity: settings.backgroundOpacity,
-              backgroundColor: "#ffffff",
-              // image width = 100vw (left half == 50vw == right half of screen),
-              // positioned so its centre lands on the right screen edge.
-              WebkitMaskImage: `url(${settings.backgroundUrl})`,
-              maskImage: `url(${settings.backgroundUrl})`,
-              WebkitMaskRepeat: "no-repeat",
-              maskRepeat: "no-repeat",
-              WebkitMaskPosition: "50vw center",
-              maskPosition: "50vw center",
-              WebkitMaskSize: "100vw auto",
-              maskSize: "100vw auto",
-            }}
+              ["--bg-vec" as string]: `url(${settings.backgroundUrl})`,
+            } as React.CSSProperties}
           />
         )}
 
