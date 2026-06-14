@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   description: "Персональный сайт театрального режиссёра Варвары Поповой",
   robots: { index: true, follow: true },
   alternates: { canonical: "/ru" },
+  verification: {
+    google: "bVIPP94Ccq4kIPO7XlsR525iUQoQijbvkYZJIT8M-TM",
+    yandex: "4b168bc77350a953",
+  },
 };
 
 export const viewport: Viewport = {
