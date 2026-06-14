@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 
 export interface LightboxImage {
   src: string;
@@ -61,7 +62,11 @@ export default function Lightbox({ images, index, onClose, onPrev, onNext }: Lig
     }
   };
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  // Portal to <body> so the overlay is centred on the viewport, not inside a
+  // transformed ancestor (reveal animations use transform → would offset fixed).
+  return createPortal(
     <div
       ref={overlayRef}
       role="dialog"
@@ -236,6 +241,7 @@ export default function Lightbox({ images, index, onClose, onPrev, onNext }: Lig
           </svg>
         </button>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }

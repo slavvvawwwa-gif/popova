@@ -6,11 +6,10 @@ import { useReveal, revealStyle } from "@/components/useReveal";
 import { useCursorPreview } from "@/components/CursorPreview";
 import Lightbox, { type LightboxImage } from "@/components/Lightbox";
 import LazyImage from "@/components/LazyImage";
+import { spanFor } from "@/lib/bento";
 import { PortableText, type PortableTextComponents, type PortableTextBlock } from "@portabletext/react";
 import { useState, useCallback } from "react";
 import type { WorkDetail } from "@/sanity/lib/data";
-
-const GALLERY_ASPECTS = ["4/3", "3/4", "16/9", "1/1", "3/4"];
 
 const ptComponents: PortableTextComponents = {
   block: {
@@ -251,11 +250,12 @@ export default function WorkDetailView({
               {t("gallery")}
             </p>
 
-            {/* Masonry "brick wall" — varied-height bricks packed with no gaps */}
-            <div className="gallery-grid" style={{ columnCount: 3, columnGap: "2px" }}>
-              {lbImages.map((img, i) => (
-                <GalleryCell key={i} image={img} index={i} aspect={GALLERY_ASPECTS[i % GALLERY_ASPECTS.length]} onClick={() => openLightbox(i)} />
-              ))}
+            {/* Dense bento mosaic — same scheme as the catalog / featured */}
+            <div className="bento-grid">
+              {lbImages.map((img, i) => {
+                const s = spanFor(i);
+                return <GalleryCell key={i} image={img} index={i} colSpan={s.c} rowSpan={s.r} onClick={() => openLightbox(i)} />;
+              })}
             </div>
           </section>
         )}
@@ -341,9 +341,6 @@ export default function WorkDetailView({
         @media (min-width: 768px) {
           .work-header { grid-template-columns: 3fr 1fr !important; }
         }
-        @media (max-width: 639px) {
-          .gallery-grid { column-count: 2 !important; }
-        }
       `}</style>
     </>
   );
@@ -365,7 +362,7 @@ function MetaRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function GalleryCell({ image, index, aspect, onClick }: { image: LightboxImage; index: number; aspect: string; onClick: () => void }) {
+function GalleryCell({ image, index, colSpan, rowSpan, onClick }: { image: LightboxImage; index: number; colSpan: number; rowSpan: number; onClick: () => void }) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -374,21 +371,24 @@ function GalleryCell({ image, index, aspect, onClick }: { image: LightboxImage; 
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       aria-label={`Открыть фото: ${image.alt}`}
+      className="bento-item"
       style={{
         display: "block",
         width: "100%",
-        marginBottom: "2px",
-        breakInside: "avoid",
+        height: "100%",
+        gridColumn: `span ${colSpan}`,
+        gridRow: `span ${rowSpan}`,
         background: "none",
         border: "none",
         padding: 0,
         cursor: "pointer",
-        aspectRatio: aspect,
         position: "relative",
         overflow: "hidden",
       }}
     >
-      <LazyImage src={image.src || undefined} alt={image.alt} placeholderLabel={String(index + 1).padStart(2, "0")} style={{ position: "absolute", inset: 0 }} />
+      <span style={{ position: "absolute", inset: 0, transform: hovered ? "scale(1.04)" : "scale(1)", transition: "transform 600ms var(--ease-out-expo)" }}>
+        <LazyImage src={image.src || undefined} alt={image.alt} placeholderLabel={String(index + 1).padStart(2, "0")} style={{ position: "absolute", inset: 0 }} />
+      </span>
 
       <span
         style={{

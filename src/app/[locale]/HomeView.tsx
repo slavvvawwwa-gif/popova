@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useRef, useState } from "react";
 import LazyImage from "@/components/LazyImage";
+import { spanFor } from "@/lib/bento";
 import type { WorkCard as WorkCardData, HomeContent } from "@/sanity/lib/data";
 
 const SECTION_PATH: Record<string, string> = {
@@ -13,16 +14,6 @@ const SECTION_PATH: Record<string, string> = {
 };
 const hrefFor = (c?: WorkCardData | null) =>
   c ? `${SECTION_PATH[c.kind] ?? "/works"}/${c.slug}` : "/works";
-
-// Bento span pattern for the home Featured grid (12-col).
-const FEATURED_SPANS: { c: number; r: number }[] = [
-  { c: 7, r: 2 },
-  { c: 5, r: 1 },
-  { c: 5, r: 1 },
-  { c: 4, r: 1 },
-  { c: 4, r: 2 },
-  { c: 4, r: 1 },
-];
 
 /* ─── Scroll-reveal hook ──────────────────────────────────────────── */
 function useReveal() {
@@ -446,7 +437,7 @@ export default function HomeView({
         {/* Dense bento of ALL featured items (any count) */}
         <div className="bento-grid">
           {featured.map((w, i) => {
-            const s = FEATURED_SPANS[i % FEATURED_SPANS.length];
+            const s = spanFor(i);
             return (
               <WorkCard
                 key={w.slug}

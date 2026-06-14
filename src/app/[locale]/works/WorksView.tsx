@@ -7,18 +7,9 @@ import { useCursorPreview } from "@/components/CursorPreview";
 import LazyImage from "@/components/LazyImage";
 import { smoothScrollTo } from "@/lib/smoothScroll";
 import { byProximity } from "@/lib/sort";
+import { spanFor } from "@/lib/bento";
 import { useState } from "react";
 import type { WorkCard } from "@/sanity/lib/data";
-
-// Bento span pattern (12-col grid) — varied tile sizes, dense packing.
-const SPANS: { c: number; r: number }[] = [
-  { c: 6, r: 2 },
-  { c: 3, r: 1 },
-  { c: 3, r: 1 },
-  { c: 4, r: 2 },
-  { c: 4, r: 1 },
-  { c: 4, r: 1 },
-];
 
 function FilterButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -116,7 +107,7 @@ export default function WorksView({
           {/* #9 — dense bento: varied tile sizes, covers fill cells, no gaps */}
           <div className="bento-grid">
             {current.map((work, i) => {
-              const s = SPANS[i % SPANS.length];
+              const s = spanFor(i);
               return <GridCard key={work.slug} work={work} index={i} basePath={basePath} colSpan={s.c} rowSpan={s.r} />;
             })}
           </div>
