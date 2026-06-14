@@ -69,38 +69,35 @@ export default async function LocaleLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
-        {/* Decorative background overlay — the vector is centred on the RIGHT
-            EDGE of the viewport, so only its left half is visible (the screen
-            edge cuts it vertically in half); its left half fills the right half
-            of the screen. Fixed (static on scroll) on every device, above the
-            black background but behind all content. */}
+        {/* Decorative background overlay. The vector is used as a CSS mask and
+            filled with solid white, so it always renders white regardless of
+            its own colours (opacity is configurable). It is centred on the
+            RIGHT EDGE of the viewport — only its left half shows (the screen
+            edge cuts it vertically in half) and that left half fills the right
+            half of the screen. Fixed (static on scroll) on every device, above
+            the black background but behind all content. */}
         {settings.backgroundUrl && (
           <div
             aria-hidden="true"
             style={{
               position: "fixed",
               inset: 0,
-              overflow: "hidden",
               pointerEvents: "none",
-              opacity: settings.backgroundOpacity,
               zIndex: 0,
+              opacity: settings.backgroundOpacity,
+              backgroundColor: "#ffffff",
+              // image width = 100vw (left half == 50vw == right half of screen),
+              // positioned so its centre lands on the right screen edge.
+              WebkitMaskImage: `url(${settings.backgroundUrl})`,
+              maskImage: `url(${settings.backgroundUrl})`,
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              WebkitMaskPosition: "50vw center",
+              maskPosition: "50vw center",
+              WebkitMaskSize: "100vw auto",
+              maskSize: "100vw auto",
             }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={settings.backgroundUrl}
-              alt=""
-              style={{
-                position: "absolute",
-                left: "100%", // image centre pinned to the right screen edge…
-                top: "50%",
-                transform: "translate(-50%, -50%)", // …regardless of its size
-                width: "100vw", // left half == 50vw == the right half of the screen
-                height: "auto",
-                maxWidth: "none",
-              }}
-            />
-          </div>
+          />
         )}
 
         <div style={{ position: "relative", zIndex: 1, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
