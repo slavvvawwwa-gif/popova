@@ -366,17 +366,42 @@ export async function getAllPaths(): Promise<{ section: string; slug: string }[]
 export interface SiteSettings {
   backgroundUrl: string | null;
   backgroundOpacity: number; // 0..1
+  backgroundAspect: number | null; // width / height of the vector (for spacing math)
+}
+
+// Read an SVG's aspect ratio (width / height) from its viewBox or width/height
+// attributes, so CSS can space stacked copies as a fraction of the vector size.
+async function svgAspect(url: string): Promise<number | null> {
+  try {
+    const res = await fetch(url, { next: { revalidate: 3600, tags: ["siteSettings"] } });
+    if (!res.ok) return null;
+    const svg = await res.text();
+    const vb = svg.match(/viewBox\s*=\s*["']([\d.\-+eE\s,]+)["']/);
+    if (vb) {
+      const p = vb[1].trim().split(/[\s,]+/).map(Number);
+      if (p.length === 4 && p[2] > 0 && p[3] > 0) return p[2] / p[3];
+    }
+    const w = svg.match(/<svg[^>]*?\bwidth\s*=\s*["']([\d.]+)/);
+    const h = svg.match(/<svg[^>]*?\bheight\s*=\s*["']([\d.]+)/);
+    if (w && h && Number(h[1]) > 0) return Number(w[1]) / Number(h[1]);
+  } catch {
+    /* network/parse failure → fall back to CSS default */
+  }
+  return null;
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  const fallback: SiteSettings = { backgroundUrl: null, backgroundOpacity: 1 };
+  const fallback: SiteSettings = { backgroundUrl: null, backgroundOpacity: 1, backgroundAspect: null };
   if (!client) return fallback;
   const r = await client.fetch<Record<string, unknown> | null>(siteSettingsQuery, {}, cache(["siteSettings"]));
   if (!r) return fallback;
   const pct = typeof r.background_opacity === "number" ? r.background_opacity : 100;
+  const backgroundUrl = (r.background_url as string) ?? null;
   return {
-    backgroundUrl: (r.background_url as string) ?? null,
+    backgroundUrl,
     backgroundOpacity: Math.max(0, Math.min(1, pct / 100)),
+    backgroundAspect:
+      backgroundUrl && /\.svg(\?|$)/i.test(backgroundUrl) ? await svgAspect(backgroundUrl) : null,
   };
 }
 

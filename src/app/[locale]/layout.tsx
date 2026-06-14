@@ -83,6 +83,9 @@ export default async function LocaleLayout({
             style={{
               opacity: settings.backgroundOpacity,
               ["--bg-vec" as string]: `url(${settings.backgroundUrl})`,
+              ...(settings.backgroundAspect
+                ? { ["--vec-ar" as string]: String(settings.backgroundAspect) }
+                : {}),
             } as React.CSSProperties}
           />
         )}

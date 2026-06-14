@@ -105,17 +105,24 @@ body {
   mask-size: 100vw auto;
 }
 /* Mobile (portrait, taller than wide): stack two copies vertically so the
-   right edge feels more filled. */
+   right edge feels more filled. The pair is centred on the viewport, with a
+   vertical gap of 30% of the vector's height between the two copies.
+   --vec-ar = vector width/height (from SVG viewBox); at width 100vw the vector
+   height is 100vw / --vec-ar, so the 30% gap is 30vw / --vec-ar. */
 @media (max-width: 767px) {
   .bg-vector {
     -webkit-mask-image: var(--bg-vec), var(--bg-vec);
     mask-image: var(--bg-vec), var(--bg-vec);
     -webkit-mask-repeat: no-repeat, no-repeat;
     mask-repeat: no-repeat, no-repeat;
-    -webkit-mask-position: 50vw 25%, 50vw 75%;
-    mask-position: 50vw 25%, 50vw 75%;
     -webkit-mask-size: 100vw auto, 100vw auto;
     mask-size: 100vw auto, 100vw auto;
+    -webkit-mask-position:
+      50vw calc(50dvh - 115vw / var(--vec-ar, 1)),
+      50vw calc(50dvh + 15vw / var(--vec-ar, 1));
+    mask-position:
+      50vw calc(50dvh - 115vw / var(--vec-ar, 1)),
+      50vw calc(50dvh + 15vw / var(--vec-ar, 1));
   }
 }
 
