@@ -69,27 +69,38 @@ export default async function LocaleLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
-        {/* Decorative background overlay — fixed to the right half of the
-            viewport on every device, never crossing the centre, static on
-            scroll. Sits above the black background but behind all content. */}
+        {/* Decorative background overlay — the vector is centred on the RIGHT
+            EDGE of the viewport, so only its left half is visible (the screen
+            edge cuts it vertically in half); its left half fills the right half
+            of the screen. Fixed (static on scroll) on every device, above the
+            black background but behind all content. */}
         {settings.backgroundUrl && (
           <div
             aria-hidden="true"
             style={{
               position: "fixed",
-              top: 0,
-              right: 0,
-              width: "50vw",
-              height: "100dvh",
-              backgroundImage: `url(${settings.backgroundUrl})`,
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              backgroundSize: "contain",
-              opacity: settings.backgroundOpacity,
+              inset: 0,
+              overflow: "hidden",
               pointerEvents: "none",
+              opacity: settings.backgroundOpacity,
               zIndex: 0,
             }}
-          />
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={settings.backgroundUrl}
+              alt=""
+              style={{
+                position: "absolute",
+                left: "100%", // image centre pinned to the right screen edge…
+                top: "50%",
+                transform: "translate(-50%, -50%)", // …regardless of its size
+                width: "100vw", // left half == 50vw == the right half of the screen
+                height: "auto",
+                maxWidth: "none",
+              }}
+            />
+          </div>
         )}
 
         <div style={{ position: "relative", zIndex: 1, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
