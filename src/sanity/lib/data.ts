@@ -342,6 +342,25 @@ function mapPeriods(arr: unknown, locale: Locale): PeriodEntry[] {
   }));
 }
 
+/* ─── All detail paths (for the sitemap) ─────────────────────────── */
+const SECTION_BY_KIND: Record<Kind, string> = {
+  performance: "works",
+  project: "projects",
+  lab: "lab",
+};
+
+export async function getAllPaths(): Promise<{ section: string; slug: string }[]> {
+  if (!client) return [];
+  const rows = await client.fetch<{ slug: string; kind: Kind }[]>(
+    `*[_type == "performance" && defined(slug.current)]{ "slug": slug.current, kind }`,
+    {},
+    cache(["performance"])
+  );
+  return (rows ?? [])
+    .filter((r) => r.slug)
+    .map((r) => ({ section: SECTION_BY_KIND[r.kind] ?? "works", slug: r.slug }));
+}
+
 /* ─── Contacts (singleton) ───────────────────────────────────────── */
 export async function getContacts(): Promise<ContactsData> {
   if (!client) return fallbackContacts();

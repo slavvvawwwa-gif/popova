@@ -180,20 +180,6 @@ export default function WorkDetailView({
           )}
         </section>
 
-        {/* Free-form content blocks (projects / labs): text / gallery in order.
-            Additional text blocks alternate left / right on desktop (#). */}
-        {work.content.map((block, i) => {
-          if (block.kind === "text") {
-            const textIdx = work.content.slice(0, i).filter((b) => b.kind === "text").length;
-            return <ContentText key={i} body={block.body} align={textIdx % 2 === 1 ? "right" : "left"} locale={locale} />;
-          }
-          return (
-            <section key={i} style={{ marginBottom: "5rem" }}>
-              <GalleryBlock images={block.images} />
-            </section>
-          );
-        })}
-
         {/* Sub-entities (releases) for projects / labs */}
         {work.children.length > 0 && (
           <section style={{ marginBottom: "5rem" }}>
@@ -243,6 +229,20 @@ export default function WorkDetailView({
             <GalleryBlock images={work.gallery} />
           </section>
         )}
+
+        {/* Free-form content blocks (projects / labs) — after the main gallery.
+            Additional text blocks alternate left / right on desktop. */}
+        {work.content.map((block, i) => {
+          if (block.kind === "text") {
+            const textIdx = work.content.slice(0, i).filter((b) => b.kind === "text").length;
+            return <ContentText key={i} body={block.body} align={textIdx % 2 === 1 ? "right" : "left"} locale={locale} />;
+          }
+          return (
+            <section key={i} style={{ marginBottom: "5rem" }}>
+              <GalleryBlock images={block.images} />
+            </section>
+          );
+        })}
 
         {/* Video — rendered only when at least one video is present */}
         {work.videos.length > 0 && (

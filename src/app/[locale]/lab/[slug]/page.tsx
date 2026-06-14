@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPerformance, type Locale } from "@/sanity/lib/data";
+import { pageAlternates } from "@/lib/seo";
 import WorkDetailView from "../../works/[slug]/WorkDetailView";
 
 export async function generateMetadata({
@@ -14,7 +15,9 @@ export async function generateMetadata({
   return {
     title: work.title,
     description: work.shortDescription || undefined,
+    alternates: pageAlternates(locale, `/lab/${slug}`),
     openGraph: {
+      type: "article",
       title: work.title,
       description: work.shortDescription || undefined,
       images: work.coverUrl ? [work.coverUrl] : undefined,

@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import Navigation from "@/components/Navigation";
 import { CursorPreviewProvider } from "@/components/CursorPreview";
 import BackToTop from "@/components/BackToTop";
+import { SITE_URL } from "@/lib/seo";
 import "../globals.css";
 
 export async function generateMetadata({
@@ -49,9 +50,22 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
 
+  const en = locale === "en";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: en ? "Varvara Popova" : "Варвара Попова",
+    jobTitle: en ? "Theatre Director" : "Театральный режиссёр",
+    url: `${SITE_URL}/${locale}`,
+  };
+
   return (
     <html lang={locale} className="h-full">
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <NextIntlClientProvider messages={messages}>
           <CursorPreviewProvider>
             <Navigation locale={locale} />

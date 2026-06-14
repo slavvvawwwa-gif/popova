@@ -1,8 +1,17 @@
 import type { Metadata } from "next";
 import { getContacts, getBio, type Locale } from "@/sanity/lib/data";
+import { pageAlternates } from "@/lib/seo";
 import ContactsView from "./ContactsView";
 
-export const metadata: Metadata = { title: "Контакты" };
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const en = locale === "en";
+  return {
+    title: en ? "Contacts" : "Контакты",
+    description: en ? "Get in touch with Varvara Popova." : "Контакты Варвары Поповой.",
+    alternates: pageAlternates(locale, "/contacts"),
+  };
+}
 
 export default async function ContactsPage({
   params,
