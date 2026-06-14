@@ -37,6 +37,11 @@ export const performanceBySlugQuery = /* groq */ `
   credits_extra_ru, credits_extra_en,
   short_description_ru, short_description_en,
   full_description_ru, full_description_en,
+  content[]{
+    _type,
+    body_ru, body_en,
+    images[]{ asset, alt, caption_ru, caption_en }
+  },
   cover_image,
   "parentSlug": parent->slug.current,
   "parentKind": parent->kind,

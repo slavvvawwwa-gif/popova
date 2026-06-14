@@ -9,7 +9,7 @@ import LazyImage from "@/components/LazyImage";
 import { spanFor } from "@/lib/bento";
 import { PortableText, type PortableTextComponents, type PortableTextBlock } from "@portabletext/react";
 import { useState, useCallback } from "react";
-import type { WorkDetail } from "@/sanity/lib/data";
+import type { WorkDetail, GalleryImg } from "@/sanity/lib/data";
 
 const ptComponents: PortableTextComponents = {
   block: {
@@ -70,34 +70,11 @@ export default function WorkDetailView({
 
   const headerReveal = useReveal();
   const descReveal = useReveal(80);
-  const galleryReveal = useReveal(120);
   const videoReveal = useReveal(160);
   const pressReveal = useReveal(200);
 
-  const lbImages: LightboxImage[] = work.gallery.map((g) => ({
-    src: g.url ?? "",
-    alt: g.alt,
-    caption: g.caption,
-  }));
-
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const openLightbox = useCallback((i: number) => setLightboxIndex(i), []);
-  const closeLightbox = useCallback(() => setLightboxIndex(null), []);
-  const prevImage = useCallback(
-    () => setLightboxIndex((i) => (i === null ? null : (i - 1 + lbImages.length) % lbImages.length)),
-    [lbImages.length]
-  );
-  const nextImage = useCallback(
-    () => setLightboxIndex((i) => (i === null ? null : (i + 1) % lbImages.length)),
-    [lbImages.length]
-  );
-
   return (
     <>
-      {lightboxIndex !== null && (
-        <Lightbox images={lbImages} index={lightboxIndex} onClose={closeLightbox} onPrev={prevImage} onNext={nextImage} />
-      )}
-
       <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "5rem 2rem 6rem" }}>
         <Link
           href={backHref}
@@ -203,6 +180,20 @@ export default function WorkDetailView({
           )}
         </section>
 
+        {/* Free-form content blocks (projects / labs): text / gallery in order.
+            Additional text blocks alternate left / right on desktop (#). */}
+        {work.content.map((block, i) => {
+          if (block.kind === "text") {
+            const textIdx = work.content.slice(0, i).filter((b) => b.kind === "text").length;
+            return <ContentText key={i} body={block.body} align={textIdx % 2 === 1 ? "right" : "left"} locale={locale} />;
+          }
+          return (
+            <section key={i} style={{ marginBottom: "5rem" }}>
+              <GalleryBlock images={block.images} />
+            </section>
+          );
+        })}
+
         {/* Sub-entities (releases) for projects / labs */}
         {work.children.length > 0 && (
           <section style={{ marginBottom: "5rem" }}>
@@ -243,20 +234,13 @@ export default function WorkDetailView({
           </section>
         )}
 
-        {/* Gallery */}
-        {lbImages.length > 0 && (
-          <section ref={galleryReveal.ref} style={{ ...revealStyle(galleryReveal.visible), marginBottom: "5rem" }}>
+        {/* Main gallery */}
+        {work.gallery.length > 0 && (
+          <section style={{ marginBottom: "5rem" }}>
             <p style={{ fontSize: "0.6rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: "2rem" }}>
               {t("gallery")}
             </p>
-
-            {/* Dense bento mosaic — same scheme as the catalog / featured */}
-            <div className="bento-grid">
-              {lbImages.map((img, i) => {
-                const s = spanFor(i);
-                return <GalleryCell key={i} image={img} index={i} colSpan={s.c} rowSpan={s.r} onClick={() => openLightbox(i)} />;
-              })}
-            </div>
+            <GalleryBlock images={work.gallery} />
           </section>
         )}
 
@@ -343,6 +327,46 @@ export default function WorkDetailView({
         }
       `}</style>
     </>
+  );
+}
+
+function GalleryBlock({ images }: { images: GalleryImg[] }) {
+  const reveal = useReveal(80);
+  const lb: LightboxImage[] = images.map((g) => ({ src: g.url ?? "", alt: g.alt, caption: g.caption }));
+  const [idx, setIdx] = useState<number | null>(null);
+  const close = useCallback(() => setIdx(null), []);
+  const prev = useCallback(() => setIdx((i) => (i === null ? null : (i - 1 + lb.length) % lb.length)), [lb.length]);
+  const next = useCallback(() => setIdx((i) => (i === null ? null : (i + 1) % lb.length)), [lb.length]);
+  if (!images.length) return null;
+  return (
+    <div ref={reveal.ref} style={revealStyle(reveal.visible)}>
+      {idx !== null && <Lightbox images={lb} index={idx} onClose={close} onPrev={prev} onNext={next} />}
+      <div className="bento-grid">
+        {lb.map((img, i) => {
+          const s = spanFor(i);
+          return <GalleryCell key={i} image={img} index={i} colSpan={s.c} rowSpan={s.r} onClick={() => setIdx(i)} />;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ContentText({ body, align, locale }: { body: unknown[] | null; align: "left" | "right"; locale: "ru" | "en" }) {
+  const reveal = useReveal(80);
+  return (
+    <section
+      ref={reveal.ref}
+      className={`work-desc${align === "right" ? " content-text--right" : ""}`}
+      style={{ ...revealStyle(reveal.visible), maxWidth: "720px", marginBottom: "var(--space-12)" }}
+    >
+      {body ? (
+        <PortableText value={body as PortableTextBlock[]} components={ptComponents} />
+      ) : (
+        <p className="body" style={{ lineHeight: 1.9 }}>
+          {locale === "en" ? "Text block — add content in the CMS." : "Текстовый блок — добавьте содержимое в CMS."}
+        </p>
+      )}
+    </section>
   );
 }
 

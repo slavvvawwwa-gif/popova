@@ -68,8 +68,13 @@ export interface PressEntry {
   performance: string | null;
 }
 
+export type ContentBlock =
+  | { kind: "text"; body: unknown[] | null }
+  | { kind: "gallery"; images: GalleryImg[] };
+
 export interface WorkDetail extends WorkCard {
   premiere: string; // ISO date
+  content: ContentBlock[];
   children: WorkCard[];
   parentSlug: string | null;
   parentKind: Kind | null;
@@ -208,11 +213,22 @@ export async function getPerformance(
   const r = await client.fetch<Record<string, unknown> | null>(performanceBySlugQuery, { slug }, cache(["performance", "pressItem"]));
   if (!r) return fallbackWorkDetail(slug, locale);
 
-  const gallery = ((r.gallery as Record<string, unknown>[]) ?? []).map((g) => ({
-    url: urlForImage(g as never)?.width(1600).quality(88).url() ?? null,
-    alt: (g.alt as string) ?? "",
-    caption: pick(g, "caption", locale),
-  }));
+  const mapGallery = (arr: unknown): GalleryImg[] =>
+    ((arr as Record<string, unknown>[]) ?? []).map((g) => ({
+      url: urlForImage(g as never)?.width(1600).quality(88).url() ?? null,
+      alt: (g.alt as string) ?? "",
+      caption: pick(g, "caption", locale),
+    }));
+
+  const gallery = mapGallery(r.gallery);
+
+  const content: ContentBlock[] = ((r.content as Record<string, unknown>[]) ?? [])
+    .map((b): ContentBlock | null => {
+      if (b._type === "textBlock") return { kind: "text", body: pickField<unknown[]>(b, "body", locale) };
+      if (b._type === "galleryBlock") return { kind: "gallery", images: mapGallery(b.images) };
+      return null;
+    })
+    .filter((b): b is ContentBlock => b !== null);
 
   const press = ((r.press as Record<string, unknown>[]) ?? []).map((p) => ({
     type: (p.type as PressEntry["type"]) ?? "review",
@@ -240,6 +256,7 @@ export async function getPerformance(
     parentSlug: (r.parentSlug as string) ?? null,
     parentKind: (r.parentKind as Kind) ?? null,
     children,
+    content,
     premiere: (r.premiere as string) ?? "",
     role: (r.role as string) ?? "",
     playwright: (r.playwright as string) ?? "",

@@ -10,6 +10,7 @@ import type {
   BioData,
   ContactsData,
   HomeContent,
+  ContentBlock,
 } from "./data";
 
 const t = (locale: Locale, ru: string, en: string) => (locale === "en" ? en : ru);
@@ -90,6 +91,13 @@ export function fallbackWorkDetail(slug: string, locale: Locale): WorkDetail {
       w.kind === "performance"
         ? []
         : fallbackWorks(locale, w.kind).filter((x) => x.slug !== w.slug),
+    content:
+      w.kind === "performance"
+        ? []
+        : [
+            { kind: "text", body: null },
+            { kind: "gallery", images: Array.from({ length: 4 }, (_, i) => ({ url: null, alt: t(locale, `Фото ${i + 1}`, `Photo ${i + 1}`), caption: "" })) },
+          ],
     premiere: `${w.year}-09-15`,
     role: t(locale, "Варвара Попова", "Varvara Popova"),
     playwright: t(locale, "У. Шекспир", "W. Shakespeare"),

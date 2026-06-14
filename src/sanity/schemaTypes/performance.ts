@@ -192,6 +192,52 @@ export const performance = defineType({
         }),
       ],
     }),
+    // Free-form sequence of text + gallery blocks (mainly for projects / labs)
+    defineField({
+      name: "content",
+      title: "Доп. блоки: текст / галерея (для проектов и лабораторий)",
+      description: "Произвольная последовательность текстовых блоков и галерей, идущих друг за другом.",
+      type: "array",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "textBlock",
+          title: "Текстовый блок",
+          fields: [
+            defineField({ name: "body_ru", title: "Текст (RU)", type: "array", of: [defineArrayMember({ type: "block" })] }),
+            defineField({ name: "body_en", title: "Текст (EN)", type: "array", of: [defineArrayMember({ type: "block" })] }),
+          ],
+          preview: { prepare: () => ({ title: "Текстовый блок" }) },
+        }),
+        defineArrayMember({
+          type: "object",
+          name: "galleryBlock",
+          title: "Галерея",
+          fields: [
+            defineField({
+              name: "images",
+              title: "Фотографии",
+              type: "array",
+              of: [
+                defineArrayMember({
+                  type: "image",
+                  options: { hotspot: true },
+                  fields: [
+                    defineField({ name: "alt", title: "Alt-текст", type: "string" }),
+                    defineField({ name: "caption_ru", title: "Подпись (RU)", type: "string" }),
+                    defineField({ name: "caption_en", title: "Подпись (EN)", type: "string" }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+          preview: {
+            select: { n: "images" },
+            prepare: ({ n }) => ({ title: "Галерея", subtitle: `${(n as unknown[] | undefined)?.length ?? 0} фото` }),
+          },
+        }),
+      ],
+    }),
     defineField({
       name: "video_links",
       title: "Видео (YouTube / Vimeo)",

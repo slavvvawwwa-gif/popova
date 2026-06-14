@@ -174,6 +174,13 @@ body {
   text-justify: inter-word;
   hyphens: auto;
 }
+/* Additional text blocks alternate to the right of the page on desktop;
+   on mobile they're full-width (no offset) — just text / gallery / text. */
+.content-text--right { margin-left: auto; }
+@media (max-width: 767px) {
+  .content-text--right { margin-left: 0 !important; }
+}
+
 /* "Красная строка" — large italic accent initial on the first paragraph */
 .work-desc > p:first-of-type::first-letter {
   float: left;
