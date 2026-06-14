@@ -49,6 +49,7 @@ export const bio = defineType({
       name: "gallery",
       title: "Галерея фотографий",
       type: "array",
+      options: { layout: "grid" },
       of: [
         defineArrayMember({
           type: "image",
@@ -56,7 +57,7 @@ export const bio = defineType({
           fields: [defineField({ name: "alt", title: "Alt-текст", type: "string" })],
         }),
       ],
-      description: "Открывается из «стопки» при нажатии на главное фото.",
+      description: "Открывается из «стопки» при нажатии на главное фото. Можно загрузить сразу несколько фото.",
     }),
     defineField({
       name: "bio_text_ru",

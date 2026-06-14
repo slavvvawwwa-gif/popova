@@ -181,6 +181,8 @@ export const performance = defineType({
       name: "gallery",
       title: "Галерея",
       type: "array",
+      options: { layout: "grid" },
+      description: "Можно перетащить или выбрать сразу несколько фото.",
       of: [
         defineArrayMember({
           type: "image",
@@ -219,6 +221,8 @@ export const performance = defineType({
               name: "images",
               title: "Фотографии",
               type: "array",
+              options: { layout: "grid" },
+              description: "Можно перетащить или выбрать сразу несколько фото.",
               of: [
                 defineArrayMember({
                   type: "image",
