@@ -1,19 +1,27 @@
 import { defineType, defineField } from "sanity";
 
-/** Site-wide settings (singleton) — e.g. the decorative background overlay. */
+/** Site-wide settings (singleton) */
 export const siteSettings = defineType({
   name: "siteSettings",
   title: "Настройки сайта",
   type: "document",
   fields: [
     defineField({
+      name: "themeColor",
+      title: "Цвет палитры сайта",
+      type: "color",
+      description:
+        "Выберите базовый цвет. Вся палитра сайта (фон, акцент, текст) строится вокруг его оттенка. " +
+        "Рекомендуемые значения: золотой (#D4AF37), медный (#B87333), терракот (#C0533A), лиловый (#7B4FA6).",
+      options: { disableAlpha: true },
+    }),
+    defineField({
       name: "background_svg",
       title: "Фоновое изображение (вектор / SVG)",
       type: "file",
       options: { accept: "image/svg+xml,.svg,image/png,image/*" },
       description:
-        "Накладывается поверх чёрного фона. Всегда занимает строго правую половину экрана, " +
-        "не заходит за середину и не двигается при прокрутке. Лучше всего — векторный SVG.",
+        "Накладывается поверх фона. Лучше всего — векторный SVG.",
     }),
     defineField({
       name: "background_opacity",
