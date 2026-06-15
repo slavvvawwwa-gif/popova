@@ -16,7 +16,16 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  poweredByHeader: false, // hide "X-Powered-By: Next.js"
+  poweredByHeader: false,
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        destination: "https://popova-v2.vercel.app/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
