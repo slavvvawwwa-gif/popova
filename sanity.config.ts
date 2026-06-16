@@ -13,6 +13,17 @@ export default defineConfig({
   basePath: "/studio",
   projectId: studioProjectId,
   dataset,
+  auth: {
+    providers: [
+      {
+        name: "google",
+        title: "Google",
+        url: "https://api.sanity.io/v2021-10-01/auth/login/google",
+        logo: "/static/google-logo.svg",
+      },
+    ],
+    redirectOnSingle: true,
+  },
   // "New document" templates that preset `kind`, so creating from each catalog
   // list (Спектакли / Проекты / Лаборатория) lands in the right section.
   schema: {

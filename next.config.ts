@@ -17,16 +17,6 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  async redirects() {
-    return [
-      {
-        // Exclude /studio so the embedded Sanity Studio stays accessible
-        source: "/((?!studio).*)",
-        destination: "https://popova-v2.vercel.app/:path*",
-        permanent: true,
-      },
-    ];
-  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
