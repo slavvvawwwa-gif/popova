@@ -20,7 +20,8 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/:path*",
+        // Exclude /studio so the embedded Sanity Studio stays accessible
+        source: "/((?!studio).*)",
         destination: "https://popova-v2.vercel.app/:path*",
         permanent: true,
       },
