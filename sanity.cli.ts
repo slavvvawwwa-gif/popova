@@ -3,7 +3,9 @@ import { projectId, dataset } from "./src/sanity/env";
 
 export default defineCliConfig({
   api: { projectId, dataset },
-  // Studio is embedded in the Next.js app at /studio
-  studioHost: undefined,
-  autoUpdates: true,
+  studioHost: "popova-cms-studio",
+  deployment: {
+    appId: "o3abin6or3svptyzje1cjng8",
+    autoUpdates: true,
+  },
 });
