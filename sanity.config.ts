@@ -3,7 +3,7 @@ import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
 import { colorInput } from "@sanity/color-input";
 
-import { studioProjectId, dataset, apiVersion } from "./src/sanity/env";
+import { dataset, apiVersion } from "./src/sanity/env";
 import { schema } from "./src/sanity/schemaTypes";
 import { structure } from "./src/sanity/structure";
 import { deleteWithContent } from "./src/sanity/actions/deleteWithContent";
@@ -11,7 +11,7 @@ import { deleteWithContent } from "./src/sanity/actions/deleteWithContent";
 // Configuration for the embedded Studio mounted at /studio.
 export default defineConfig({
   basePath: "/studio",
-  projectId: studioProjectId,
+  projectId: "mq82kdu0",
   dataset,
   auth: {
     providers: [
